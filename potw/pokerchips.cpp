@@ -49,9 +49,6 @@ public:
 					}
 				}
 				if (neg_idx) {
-					/*if (k > 1) {
-						max_points = max(1 << (k - 2), max_points);
-					}*/
 				} else if (k > 1) {
 					max_points = max(P[idxOf(v)] + (1 << (k - 2)), max_points);
 				} else {
@@ -112,28 +109,17 @@ int main (void) {
 		// Assuming m[d] > 1 for now
 		while(v_i != v_end) {
 			P.update(v_i);
-			int di = 0;
-			while(m[di] == 1) {
-				di++;
-			}
 			// increment
-			v_i[di] += 1;
+			v_i[0] += 1;
 			// carry oveflow
-			for(int d = di; d < n && v_i[d] == m[d];) {
+			for(int d = 0; d < n && v_i[d] == m[d]; d++) {
 				v_i[d] = -1;
-				do {
-					d++;
-				} while(d < n && m[d] == 1);
-				v_i[d] += 1;
+				if (d < n) {
+					v_i[d + 1] += 1;
+				}
 			}
 		}
 		P.update(v_i);
-		//cout << "\nv_i:" << P.getPoints(v_i) << "\n";
-		for(vector<int>::iterator it = v_end.begin();
-				it != v_end.end(); it++) {
-		//	cout << *it << " ";
-		}
-		//cout << "\nv_end:";
 		cout << P.getPoints(v_end) << "\n";
 	}
 }
