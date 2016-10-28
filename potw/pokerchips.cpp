@@ -17,14 +17,13 @@ public:
 		this->rl.resize(n);
 		for(int i = 0; i < n; i++) {
 			this->rl[i] = row_length;
-			row_length = row_length * m[i];
+			row_length = row_length * (m[i] + 1);
 		}
 		P.resize(idxOf(m));
 	}
 	int getPoints(vector<int> &idx) {
 		return P[idxOf(idx)];
 	};
-	// TODO: when one column is empty can still carry on
 	void update(vector<int> &idx) {
 		int max_points = 0;
 		// for all s in 2^n, check idx i-s
@@ -40,18 +39,19 @@ public:
 				}
 			}
 			if(same_color) {
+				bool neg_idx = false;
 				vector<int> v(n);
 				copy(idx.begin(), idx.end(), v.begin());
 				for (int i = 0; i < n; i++) {
 					if ((s >> i) % 2 == 1) {
 						v[i] = v[i] - 1;
-						valid &= (idx[i] > 0);
+						neg_idx |= (v[i] < -1);
 					}
 				}
-				if (!valid) {
-					if (k > 1) {
+				if (neg_idx) {
+					/*if (k > 1) {
 						max_points = max(1 << (k - 2), max_points);
-					}
+					}*/
 				} else if (k > 1) {
 					max_points = max(P[idxOf(v)] + (1 << (k - 2)), max_points);
 				} else {
@@ -70,7 +70,7 @@ private:
 	int idxOf(vector<int> &i) {
 		int idx = 0;
 		for(int j = 0; j < n; j++) {
-			idx += i[j]*rl[j];
+			idx += (i[j] + 1)*rl[j];
 		}
 		return idx;
 	}
@@ -106,7 +106,7 @@ int main (void) {
 		vector<int> v_i(n);
 		vector<int> v_end(n);
 		for (int i = 0; i < n; i++)  {
-			v_i[i] = 0;
+			v_i[i] = -1;
 			v_end[i] = m[i] - 1;
 		}
 		// Assuming m[d] > 1 for now
@@ -120,7 +120,7 @@ int main (void) {
 			v_i[di] += 1;
 			// carry oveflow
 			for(int d = di; d < n && v_i[d] == m[d];) {
-				v_i[d] = 0;
+				v_i[d] = -1;
 				do {
 					d++;
 				} while(d < n && m[d] == 1);
