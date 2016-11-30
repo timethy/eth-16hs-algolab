@@ -41,7 +41,6 @@ void testcase() {
 	for(vector<Edge>::iterator it = mst_edges.begin(); it != mst_edges.end(); it++) {
 		w += weightmap[*it];
 	}
-	cout << w << endl;
 
 	vector<Vertex> predecessors(num_vertices(G));
 	vector<int> distances(num_vertices(G));
@@ -49,13 +48,8 @@ void testcase() {
 		predecessor_map(make_iterator_property_map(predecessors.begin(), get(vertex_index, G))).
 		distance_map(make_iterator_property_map(distances.begin(), get(vertex_index, G))));
 
-	int d = 0;
-	for(vector<int>::iterator it = distances.begin(); it != distances.end(); it++) {
-		if(*it != INT_MAX) {
-			d = max(d, *it);
-		}
-	}
-	cout << d << endl;
+	int d = *max_element(distances.begin(), distances.end());
+	cout << w << " " << d << endl;
 }
 
 // Main function looping over the testcases
