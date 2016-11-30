@@ -6,22 +6,19 @@
 #include <boost/graph/connected_components.hpp>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 #include <CGAL/Delaunay_triangulation_2.h>
-#include <CGAL/squared_distance_2.h>
 
 using namespace std;
 using namespace boost;
 
 // Directed graph with integer weights on edges.
 typedef adjacency_list<vecS, vecS, undirectedS, no_property, no_property> Graph;
-typedef graph_traits<Graph>::vertex_descriptor Vertex;	// Vertex type		
 typedef graph_traits<Graph>::edge_descriptor Edge;	// Edge type
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
 typedef CGAL::Delaunay_triangulation_2<K> Triangulation;
 typedef Triangulation::Edge_iterator Edge_iterator;
-typedef Triangulation::Segment Segment;
 
-int max_connected_component(map<K::Point_2, int>& points, vector<K::Point_2>& planets, int l, double r_squared) {
+int max_connected_component(map<K::Point_2, int>& points, vector<K::Point_2>& planets, int l, long long r_squared) {
 	size_t V = planets.size() - l;
 	// Build the delaunay triangulation
 	Triangulation t;
@@ -38,13 +35,13 @@ int max_connected_component(map<K::Point_2, int>& points, vector<K::Point_2>& pl
 	// Find connected components
 	vector<int> comps(V);
 	int nscc = connected_components(G, make_iterator_property_map(comps.begin(), get(vertex_index, G)));
-	// Get biggest connected component
-	int m = 0;
-	for (int i = 0; i < nscc; i++) {
-		int m_ = count(comps.begin(), comps.end(), i);
-		m = max(m, m_);
+	// Count the number of vertices per component
+	vector<int> comps_count(nscc, 0);
+	for (vector<int>::iterator it = comps.begin(); it != comps.end(); ++it) {
+		comps_count[*it] += 1;
 	}
-	return m;
+	// Return biggest component
+	return *(max_element(comps_count.begin(), comps_count.end()));
 }
 
 void testcase(int t) {
@@ -53,18 +50,19 @@ void testcase(int t) {
 
 	map<K::Point_2, int> points;
 	vector<K::Point_2> planets(n);
-	
+
 	for (int i = 0; i < n; i++) {
 		int x, y;
 		cin >> x >> y;
-		planets[i] = K::Point_2(x, y);
-		points.insert(make_pair(K::Point_2(x, y), i));
+		auto p = K::Point_2(x, y);
+		planets[i] = p;
+		points.insert(make_pair(p, i));
 	}
-	
+
 	// Binary search
-	int kl = 0; // the first feasible
-	int kr = n/2+1; // the first unfeasible
-	double r_squared = r;
+	int kl = 1; // the first feasible (one is always feasible)
+	int kr = n/2+1; // the first unfeasible (more than the half is always infeasible)
+	long long r_squared = r;
 	r_squared *= r_squared;
 	while(kr - kl > 1) {
 		int k = kl+(kr-kl)/2;

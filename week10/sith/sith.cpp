@@ -43,54 +43,56 @@ int max_connected_component(vector<vector<int>>& adj, int l, int n) {
 	return m;
 }
 
+void testcase(int t) {
+	int n, r;
+	cin >> n >> r;
+
+	vector<int> xs(n);
+	vector<int> ys(n);
+
+	vector<vector<int>> adj(n);
+	
+	for (int i = 0; i < n; i++) {
+		int x, y;
+		cin >> x >> y;
+		xs[i] = x;
+		ys[i] = y;
+	}
+	
+	// Reachabilities
+	for (int i = 0; i < n; i++) {
+		for (int j = i+1; j < n; j++) {
+			if (dist_squared(xs[i], ys[i], xs[j], ys[j]) <= r) {
+				// For every node store edges referring to later edges:
+				adj[i].push_back(j);
+			}
+		}
+	}
+
+	// Binary search
+	int kl = 0; // the first feasible
+	int kr = n/2+1; // the first unfeasible
+	while(kr - kl > 1) {
+		int k = kl+(kr-kl)/2;
+		int m = max_connected_component(adj, k, n);
+		if(k <= m) {
+			kl = k;
+		} else {
+			kr = k;
+		}
+	}
+
+	cout << kl << endl;
+}
+
 int main (void) {
 	cin.sync_with_stdio(false);
 	cout.sync_with_stdio(false);
 
 	int t;
 	cin >> t;
-	for (; t > 0; t--) {
-		int n, r;
-		cin >> n >> r;
-
-		vector<int> xs(n);
-		vector<int> ys(n);
-
-		vector<vector<int>> adj(n);
-
-		for (int i = 0; i < n; i++) {
-			int x, y;
-			cin >> x >> y;
-			xs[i] = x;
-			ys[i] = y;
-		}
-
-		// Reachabilities
-		for (int i = 0; i < n; i++) {
-			for (int j = i+1; j < n; j++) {
-				if (dist_squared(xs[i], ys[i], xs[j], ys[j]) <= r) {
-					// For every node store edges referring to later edges:
-					adj[i].push_back(j);
-				}
-			}
-		}
-
-		// Binary search
-		int kl = 0; // the first feasible
-		int kr = n/2+1; // the first unfeasible
-		while(kr - kl > 1) {
-			int k = kl+(kr-kl)/2;
-			int m = max_connected_component(adj, k, n);
-			if(k <= m) {
-				kl = k;
-			} else {
-				kr = k;
-			}
-		}
-
-//		cout << "kl= " << kl << endl;
-//		cout << "kr= " << kr << endl;
-		cout << kl << endl;
+	for (int i = 0; i < t; ++i) {
+		testcase(i);
 	}
 }
 
