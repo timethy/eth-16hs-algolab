@@ -27,7 +27,7 @@ typedef property_map<Graph, edge_residual_capacity_t>::type ResidualCapacityMap;
 typedef property_map<Graph, edge_reverse_t>::type       ReverseEdgeMap;
 typedef graph_traits<Graph>::vertex_descriptor          Vertex;
 typedef graph_traits<Graph>::edge_descriptor            Edge;
-typedef graph_traits<Graph>::out_edge_iterator  OutEdgeIt; // Iterator
+typedef graph_traits<Graph>::edge_iterator              EdgeIt;
 
 class EdgeAdder {
     Graph &G;
@@ -71,26 +71,36 @@ void testcase() {
 
 	// Build the graph
 	Graph G(n+1);
-    EdgeCapacityMap capacitymap = get(edge_capacity, G);
-    EdgeWeightMap weightmap = get(edge_weight, G);
+    EdgeCapacityMap capacities = get(edge_capacity, G);
+    EdgeWeightMap weights = get(edge_weight, G);
     ReverseEdgeMap revedgemap = get(edge_reverse, G);
-//    ResidualCapacityMap rescapacitymap = get(edge_residual_capacity, G);
-    EdgeAdder ea(G, capacitymap, weightmap, revedgemap);
+	ResidualCapacityMap res_capacities = get(edge_residual_capacity, G);
+    EdgeAdder ea(G, capacities, weights, revedgemap);
 
 	// Limit max. capacity
 	ea.addEdge(v_source, 0, l, 0);
 	for (int i = 0; i < n-1; i++) {
-		ea.addEdge(i, i+1, l, 0);
+		for (int j = i+1; j < n-1; j++) {
+			ea.addEdge(i, j, l+1, max_prio + 1);
+		}
 	}
 	for (int i = 0; i < m; i++) {
-		ea.addEdge(xs[i], ys[i], 1, -ps[i]);
+		ea.addEdge(xs[i], ys[i], 1, max_prio-ps[i]);
 	}
 
 	// Maxflow-mincost
-	push_relabel_max_flow(G, v_source, n-1);
-	cycle_canceling(G);
-	int cost = find_flow_cost(G);
-	// print out the readjusted cost (negative value)
+//	successive_shortest_path_nonnegative_weights(G, v_source, n-1);
+	int cost = 0;
+	// Find out how much to shift it (number of "Freifahrten")
+	EdgeIt e, e_end;
+	for(tie(e, e_end) = edges(G); e != e_end; ++e) {
+		if(weights[*e] <= max_prio && weights[*e] >= 0 &&
+				capacities[*e] == 1 &&
+				(capacities[*e] - res_capacities[*e]) == 1) {
+			cost += weights[*e] - max_prio;
+		}
+	}
+
 	cout << -cost << endl;
 }
 
