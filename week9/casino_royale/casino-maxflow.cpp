@@ -11,9 +11,6 @@
 using namespace std;
 using namespace boost;
 
-// BGL Graph definitions
-// =====================
-// Graph Type with nested interior edge properties for Cost Flow Algorithms
 typedef adjacency_list_traits<vecS, vecS, directedS> Traits;
 typedef adjacency_list<vecS, vecS, directedS, no_property,
     property<edge_capacity_t, long,
