@@ -22,18 +22,17 @@ typedef property_map<Graph, edge_capacity_t>::type      EdgeCapacityMap;
 typedef property_map<Graph, edge_weight_t >::type       EdgeWeightMap;
 typedef property_map<Graph, edge_residual_capacity_t>::type ResidualCapacityMap;
 typedef property_map<Graph, edge_reverse_t>::type       ReverseEdgeMap;
-typedef graph_traits<Graph>::vertex_descriptor          Vertex;
 typedef graph_traits<Graph>::edge_descriptor            Edge;
 typedef graph_traits<Graph>::edge_iterator              EdgeIt;
 
 class EdgeAdder {
-    Graph &G;
-    EdgeCapacityMap &capacitymap;
-    EdgeWeightMap &weightmap;
-    ReverseEdgeMap  &revedgemap;
+    Graph& G;
+    EdgeCapacityMap& capacitymap;
+    EdgeWeightMap& weightmap;
+    ReverseEdgeMap& revedgemap;
 
 public:
-    EdgeAdder(Graph & G, EdgeCapacityMap &capacitymap, EdgeWeightMap &weightmap, ReverseEdgeMap &revedgemap)
+    EdgeAdder(Graph& G, EdgeCapacityMap &capacitymap, EdgeWeightMap &weightmap, ReverseEdgeMap &revedgemap)
         : G(G), capacitymap(capacitymap), weightmap(weightmap), revedgemap(revedgemap) {}
 
     Edge addEdge(int u, int v, long c, long w) {
@@ -71,9 +70,9 @@ void testcase() {
 	Graph G(n+1);
     EdgeCapacityMap capacities = get(edge_capacity, G);
     EdgeWeightMap weights = get(edge_weight, G);
-    ReverseEdgeMap revedgemap = get(edge_reverse, G);
+    ReverseEdgeMap rev = get(edge_reverse, G);
 	ResidualCapacityMap res_capacities = get(edge_residual_capacity, G);
-    EdgeAdder ea(G, capacities, weights, revedgemap);
+    EdgeAdder ea(G, capacities, weights, rev);
 
 	map<Edge, int> length_map;
 	// Limit max. capacity
@@ -90,7 +89,7 @@ void testcase() {
 	// Maxflow-mincost
 	successive_shortest_path_nonnegative_weights(G, v_source, n-1);
 	int cost = 0;
-	// Find out how much to shift it (number of "Freifahrten")
+	// Shift it by length*max_prio
 	EdgeIt e, e_end;
 	for(tie(e, e_end) = edges(G); e != e_end; ++e) {
 		int flow = capacities[*e] - res_capacities[*e];
@@ -98,7 +97,6 @@ void testcase() {
 			cost += flow * (weights[*e] - max_prio * length_map[*e]);
 		}
 	}
-
 	cout << -cost << endl;
 }
 
