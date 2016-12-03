@@ -10,16 +10,10 @@
 using namespace std;
 using namespace boost;
 
-// BGL Graph definitions
-// =====================
-// Graph Type with nested interior edge properties for Cost Flow Algorithms
 typedef adjacency_list<vecS, vecS, directedS, no_property,
 		property<edge_weight_t, int> > Graph;
 typedef adjacency_list<vecS, vecS, undirectedS, no_property, no_property> UGraph;
-typedef property_map<Graph, edge_weight_t >::type EdgeWeightMap;
 typedef graph_traits<Graph>::vertex_descriptor Vertex;
-typedef graph_traits<Graph>::edge_descriptor Edge;
-typedef graph_traits<Graph>::edge_iterator EdgeIt; // Iterator
 
 int exp_bin_search(int a, int s, int c, int d,
                    multimap<int, pair<int, int>>& a_to_s,
