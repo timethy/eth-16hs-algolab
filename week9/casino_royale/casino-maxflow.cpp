@@ -36,7 +36,7 @@ public:
     EdgeAdder(Graph & G, EdgeCapacityMap &capacitymap, EdgeWeightMap &weightmap, ReverseEdgeMap &revedgemap)
         : G(G), capacitymap(capacitymap), weightmap(weightmap), revedgemap(revedgemap) {}
 
-    void addEdge(int u, int v, long c, long w) {
+    Edge addEdge(int u, int v, long c, long w) {
         Edge e, reverseE;
         tie(e, tuples::ignore) = add_edge(u, v, G);
         tie(reverseE, tuples::ignore) = add_edge(v, u, G);
@@ -46,6 +46,7 @@ public:
         weightmap[reverseE] = -w;
         revedgemap[e] = reverseE;
         revedgemap[reverseE] = e;
+	    return e;
     }
 };
 
@@ -74,27 +75,27 @@ void testcase() {
 	ResidualCapacityMap res_capacities = get(edge_residual_capacity, G);
     EdgeAdder ea(G, capacities, weights, revedgemap);
 
+	map<Edge, int> length_map;
 	// Limit max. capacity
 	ea.addEdge(v_source, 0, l, 0);
 	for (int i = 0; i < n-1; i++) {
-		for (int j = i+1; j < n-1; j++) {
-			ea.addEdge(i, j, l+1, max_prio + 1);
-		}
+		Edge e = ea.addEdge(i, i+1, l, max_prio);
+		length_map.insert(make_pair(e, 1));
 	}
 	for (int i = 0; i < m; i++) {
-		ea.addEdge(xs[i], ys[i], 1, max_prio-ps[i]);
+		Edge e = ea.addEdge(xs[i], ys[i], 1, max_prio*(ys[i]-xs[i])-ps[i]);
+		length_map.insert(make_pair(e, ys[i]-xs[i]));
 	}
 
 	// Maxflow-mincost
-//	successive_shortest_path_nonnegative_weights(G, v_source, n-1);
+	successive_shortest_path_nonnegative_weights(G, v_source, n-1);
 	int cost = 0;
 	// Find out how much to shift it (number of "Freifahrten")
 	EdgeIt e, e_end;
 	for(tie(e, e_end) = edges(G); e != e_end; ++e) {
-		if(weights[*e] <= max_prio && weights[*e] >= 0 &&
-				capacities[*e] == 1 &&
-				(capacities[*e] - res_capacities[*e]) == 1) {
-			cost += weights[*e] - max_prio;
+		int flow = capacities[*e] - res_capacities[*e];
+		if(flow == 1) {
+			cost += flow * (weights[*e] - max_prio * length_map[*e]);
 		}
 	}
 
