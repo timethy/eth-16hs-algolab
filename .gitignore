@@ -1,6 +1,15 @@
+# Ignore all
+*
+# Unignore all with extensions
+!*.*
+# Unignore all dirs
+!*/
+
 .idea
 cmake-build-debug
 CMakeLists.txt
+CMakeCache.txt
 CMakeFiles
+Makefile
 
 
