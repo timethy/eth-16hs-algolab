@@ -1,145 +1,122 @@
 #include <iostream>
 #include <vector>
+#include <bitset>
 #include <map>
 #include <algorithm>
 
 using namespace std;
 
-class Node {
+class Commando {
 public:
-	bool operator< (const Node& other) {
-		return lvl >= other.lvl;
-	}
-	int lvl;
-
-	vector<bool> feasible;
-	vector<int> max_children;
-
-	vector<int> successors;
-
-	// y supervised by x
-	map<int, vector<int>> super;
-	map<int, vector<int>> supered;
-	// key is parent. y in this commando supervised by x in other commando
-	map<int, vector<pair<int, int>>> supered_parents;
+	vector<int> children;
+	multimap<int, int> supervise;
+	map<int, int> supervised;
+	vector<long> DP; // INIT to -1
 };
 
-int set_level(vector<Node> &C, Node &n) {
-	int max_lvl = n.lvl;
-	for(vector<int>::iterator s_i(n.successors.begin());
-		s_i != n.successors.end(); s_i++) {
-		C[*s_i].lvl = n.lvl + 1;
-		max_lvl = max(set_level(C, C[*s_i]), max_lvl);
+int sum_children(vector<Commando>& C, int s, vector<int>& children, bitset<14> S) {
+	int sum = 0;
+	for(vector<int>::iterator it = children.begin(); it != children.end(); it++) {
+		Commando& Cchild = C[*it];
+		// Compute KO set
+		bitset<14> KO(0);
+		for(map<int, int>::iterator it_ = Cchild.supervised.begin(); it_ != Cchild.supervised.end(); ++it_) {
+			if(S.test(it_->second)) {
+				KO.set(it_->first);
+			}
+		}
+		// flip'em
+		bitset<14> feasible = KO xor bitset<14>((1<<s) - 1);
+		sum += Cchild.DP[feasible.to_ulong()];
 	}
-	return max_lvl;
+	return sum;
 }
 
-int bitcount(int j) {
-	if(j > 0) {
-		return bitcount(j >> 1) + (j % 2);
+// DP(c, S): One entry means how many troopers can be controlled in that subtree.
+// (with the given subset S of troopers in the root)
+long DP_entry(vector<Commando>& C, unsigned s, int c, bitset<14> S) {
+	Commando& Cc = C[c];
+	if(Cc.DP[S.to_ulong()] >= 0) {
+		// Already computed
+		return Cc.DP[S.to_ulong()];
 	}
-	return 0;
-}
-
-void set_feasible(Node &C_i, int k, int i) {
-	if(i < k) {
-		set_feasible(C_i, k, i+1);
-		for(int j = 0; j < (1 << i); j++) {
-			if(C_i.feasible[j]) {
-				bool for_all = true;
-				for(int a = 0; a < i; a++) {
-					if(((a bitand j) > 0) &&
-					   (C_i.super.find(i) != C_i.super.end() or
-					    C_i.supered.find(i) != C_i.supered.end())) {
-						for_all = false;
-					}
-				}
-				C_i.feasible[(1 << i) bitor j] = for_all;
+	// check if bitset is feasible:
+	bitset<14> S_cover(0);
+	for(size_t t = 0; t < s; t++) {
+		if(S.test(t)) {
+			multimap<int, int>::iterator it, it_end;
+			for(tie(it, it_end) = Cc.supervise.equal_range(t); it != it_end; ++it) {
+				S_cover.set(it->second);
 			}
 		}
 	}
+	long x = 0;
+	if((S & S_cover).none()) { // no overlap => feasible
+		x = S.count() + sum_children(C, s, Cc.children, S);
+	} else {
+		x = 0;
+	}
+	// Now compute entry for all subsets and take maximum of it
+	for(size_t i = 0; i < s; i++) {
+		if(S.test(i)) {
+			bitset<14> S_ = S;
+			S_.reset(i);
+			x = max(x, DP_entry(C, s, c, S_));
+		}
+	}
+	Cc.DP[S.to_ulong()] = x;
+	return x;
 }
 
-int main (void) {
-	cin.sync_with_stdio(false);
-	cout.sync_with_stdio(false);
+void DP_compute(vector<Commando>& C, unsigned s, int c) {
+	Commando& Cc = C[c];
+	// Compute children first
+	for(vector<int>::iterator it = Cc.children.begin(); it != Cc.children.end(); it++) {
+		DP_compute(C, s, *it);
+	}
+	// Then compute our entries
+	DP_entry(C, s, c, bitset<14>((1<<s) - 1));
+}
 
+void testcase() {
+	unsigned k, s, m;
+	cin >> k >> s >> m;
+
+	vector<Commando> C(k);
+	for(unsigned i = 0; i < k; i++) {
+		C[i].DP.reserve(1<<s);
+		for(int j = 0; j < 1<<s; j++) {
+			C[i].DP[j] = -1;
+		}
+	}
+
+	for(unsigned i = 0; i < m; i++) {
+		int u, v, h;
+		cin >> u >> v >> h;
+		if(u != v) {
+			C[u].children.push_back(v);
+		}
+		for (int j = 0; j < h; j++) {
+			int x, y;
+			cin >> x >> y;
+			if(u != v) {
+				C[v].supervised.insert(make_pair(y, x));
+			} else {
+				C[u].supervise.insert(make_pair(x, y));
+			}
+		}
+	}
+
+	// Compute for all children:
+	DP_compute(C, s, 0);
+
+	cout << C[0].DP[(1<<s) - 1] << endl;
+}
+
+int main() {
+	ios_base::sync_with_stdio(false);
 	int t;
 	cin >> t;
-	for (; t > 0; t--) {
-		int k, s, m;
-		cin >> k >> s >> m;
-
-		vector<Node> C(k);
-		map<int, vector<int>> super_by;
-		for (vector<Node>::iterator it = C.begin(); it != C.end(); it++) {
-			// make enough space
-			it->feasible = vector<bool>(1 << s, 1);
-			it->max_children = vector<int>(1 << s, 0);
-			it->supered_parents = map<int, vector<pair<int,int>>>();
-		}
-
-		// read in supervise relation
-		for (int i = 0; i < m; i++) {
-			int u, v, h;
-			cin >> u >> v >> h;
-			for (int j = 0; j < h; j++) {
-				int x, y;
-				cin >> x >> y;
-				if (u == v) {
-					C[u].super[x].push_back(y);
-					C[u].supered[y].push_back(x);
-				} else {
-					C[u].successors.push_back(v);
-					if(C[v].supered_parents.find(u) != C[v].supered_parents.end()) {
-						C[v].supered_parents[u].push_back(make_pair(y, x));
-					} else {
-						C[v].supered_parents.insert(make_pair(u, vector<pair<int,int>>(1, make_pair(y, x))));
-					}
-				}
-			}
-		}
-
-		for(vector<Node>::iterator it(C.begin());
-		    it != C.end(); it++) {
-			// generate all feasible sets
-			set_feasible(*it, s, 0);
-		}
-		int max_lvl = set_level(C, C[0]);
-		cout << "max_lvl " << max_lvl << "\n";
-		for(int z = 0; z <= max_lvl; z++) {
-			for (vector<Node>::iterator it(C.begin());
-		     	 it != C.end(); it++) {
-			if(it->lvl == z) {
-				for(int j = 0; j < (1 << s); j++) {
-					if(it->feasible[j]) {
-						cout << "feasible: " << j << "\n";
-						// Number of troopers = bitcount of j
-						for(map<int, vector<pair<int, int>>>::iterator pit = it->supered_parents.begin();
-							pit != it->supered_parents.end(); pit++) {
-							Node* P = &C[pit->first];
-							int cover = (1 << s) - 1;
-							for(vector<pair<int,int>>::iterator vit = pit->second.begin();
-								vit != pit->second.end(); vit++) {
-								cover -= (1 << vit->first);
-							}
-							cout << "cover: " << j << "\n";
-							if(P->feasible[cover]) {
-								P->max_children[cover] = max(P->max_children[cover],
-																						 it->max_children[j]+bitcount(j));
-							}
-						}
-					}
-				}
-			}
-		}
-		}
-		int max_S = 0;
-		for(int j = 0; j < (1 << s); j++) {
-			if(C.back().feasible[j]) {
-				max_S = max(C[0].max_children[j] + bitcount(j), max_S);
-			}
-		}
-		cout << max_S << "\n";
-	}
+	while(t--) { testcase(); }
+	return 0;
 }
