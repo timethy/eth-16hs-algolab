@@ -10,7 +10,7 @@ class Commando {
 public:
 	vector<int> children;
 	multimap<int, int> supervise;
-	map<int, int> supervised;
+	multimap<int, int> supervised;
 	vector<long> DP; // INIT to -1
 };
 
@@ -18,16 +18,21 @@ int sum_children(vector<Commando>& C, int s, vector<int>& children, bitset<14> S
 	int sum = 0;
 	for(vector<int>::iterator it = children.begin(); it != children.end(); it++) {
 		Commando& Cchild = C[*it];
-		// Compute KO set
-		bitset<14> KO(0);
-		for(map<int, int>::iterator it_ = Cchild.supervised.begin(); it_ != Cchild.supervised.end(); ++it_) {
+		// Compute covered set
+		bitset<14> covered(0);
+		for(multimap<int, int>::iterator it_ = Cchild.supervised.begin(); it_ != Cchild.supervised.end(); ++it_) {
 			if(S.test(it_->second)) {
-				KO.set(it_->first);
+				covered.set(it_->first);
 			}
 		}
 		// flip'em
-		bitset<14> feasible = KO xor bitset<14>((1<<s) - 1);
-		sum += Cchild.DP[feasible.to_ulong()];
+		bitset<14> uncovered = covered xor bitset<14>((1<<s) - 1);
+/*		cout << "c=" << *it << endl;
+		cout << S << endl;
+		cout << covered << endl;
+		cout << uncovered << endl;
+		cout << "----" << endl;*/
+		sum += Cchild.DP[uncovered.to_ulong()];
 	}
 	return sum;
 }
@@ -39,33 +44,33 @@ long DP_entry(vector<Commando>& C, unsigned s, int c, bitset<14> S) {
 	if(Cc.DP[S.to_ulong()] >= 0) {
 		// Already computed
 		return Cc.DP[S.to_ulong()];
-	}
-	// check if bitset is feasible:
-	bitset<14> S_cover(0);
-	for(size_t t = 0; t < s; t++) {
-		if(S.test(t)) {
-			multimap<int, int>::iterator it, it_end;
-			for(tie(it, it_end) = Cc.supervise.equal_range(t); it != it_end; ++it) {
-				S_cover.set(it->second);
+	} else {
+		// check if bitset is feasible:
+		bitset<14> S_cover(0);
+		for (size_t t = 0; t < s; t++) {
+			if (S.test(t)) {
+				auto range = Cc.supervise.equal_range(t);
+				for (auto it = range.first; it != range.second; ++it) {
+					S_cover.set(it->second);
+				}
 			}
 		}
-	}
-	long x = 0;
-	if((S & S_cover).none()) { // no overlap => feasible
-		x = S.count() + sum_children(C, s, Cc.children, S);
-	} else {
-		x = 0;
-	}
-	// Now compute entry for all subsets and take maximum of it
-	for(size_t i = 0; i < s; i++) {
-		if(S.test(i)) {
-			bitset<14> S_ = S;
-			S_.reset(i);
-			x = max(x, DP_entry(C, s, c, S_));
+		long x = 0;
+		if ((S & S_cover).none()) { // no overlap => feasible
+//			cout << "c=" << c << ",S=" << S << " is feasible." << endl;
+			x = S.count() + sum_children(C, s, Cc.children, S);
 		}
+		// Now compute entry for all subsets and take maximum of it
+		for (size_t i = 0; i < s; i++) {
+			if (S.test(i)) {
+				bitset<14> S_ = S;
+				S_.reset(i);
+				x = max(x, DP_entry(C, s, c, S_));
+			}
+		}
+		Cc.DP[S.to_ulong()] = x;
+		return x;
 	}
-	Cc.DP[S.to_ulong()] = x;
-	return x;
 }
 
 void DP_compute(vector<Commando>& C, unsigned s, int c) {
