@@ -21,15 +21,19 @@ void DP_entry(vector<Commando>& C, long s, int c, bitset<14> S) {
 	// check if bitset is feasible:
 	bitset<14> S_cover(0);
 	for(long t = 0; t < s; t++) {
-		if(S.test(t)) {
-			multimap<int, int>::iterator it, it_end;
-			for(tie(it, it_end) = Cc.supervise.equal_range(t); it != it_end; ++it) {
+		multimap<int, int>::iterator it, it_end;
+		for(tie(it, it_end) = Cc.supervise.equal_range(t); it != it_end; ++it) {
+			// in both directions
+			if(S.test(t)) {
 				S_cover.set(it->second);
+			}
+			if(S.test(it->second)) {
+				S_cover.set(it->first);
 			}
 		}
 	}
-	cout << "S:       " << S << endl;
-	cout << "S_cover: " << S_cover << endl;
+	//cout << "S:       " << S << endl;
+	//cout << "S_cover: " << S_cover << endl;
 	if((S & S_cover).none()) { // no overlap feasible
 		Cc.DP[S.to_ulong()] = S.count();
 		// Now compute sum (for every children) of maximal number of troopers per child
