@@ -7,29 +7,24 @@
 
 using namespace std;
 
-// RECALL from DnA
+// IDEA:
+// IFF there is exactly one coin that has a different weight its either lighter or heavier.
+// IF besaid coin is lighter, it must appear in ALL '<' measurements on the left and none in the right (vice-versa for '>')
+//    and none '=' measurements.
+// IF it is heavier, than vice-versa
 void testcase() {
 	unsigned n, k;
 	cin >> n >> k;
 
-	vector<char> outcomes(k);
-	vector<vector<int>> lefts(k);
-	vector<vector<int>> rights(k);
+	int IN_total = 0, E_total = 0;
+	// (coin#id - 1) -> number of L, H, E measurements
+	vector<int> L(n, 0), H(n, 0), E(n, 0);
 
-	// 111 = all poss,
-	// 011 = < or equal
-	// 101 = > or equal
-	// 001 = correct,
-	int EQ = 0;
-	int LT = 1;
-	int GT = 2;
-	vector<bitset<3>> coins;
-
-	for(unsigned i = 0; i < k; i++) {
+	for (unsigned i = 0; i < k; i++) {
 		unsigned P_i;
+		char outcome;
 		cin >> P_i;
-		vector<int> &left = lefts[i];
-		vector<int> &right = rights[i];
+		vector<int> left, right;
 		for (unsigned j = 0; j < P_i; j++) {
 			int coin;
 			cin >> coin;
@@ -40,50 +35,57 @@ void testcase() {
 			cin >> coin;
 			right.push_back(coin);
 		}
-		cin >> outcomes[i];
-	}
-
-	int c = 0;
-	for(unsigned i = 0; i < k; i++) {
-		char outcome = outcomes[i];
-		vector<int> &left = lefts[i];
-		vector<int> &right = rights[i];
-		if(outcome == '<') {
-			auto tmp = left;
-			left = right;
-			right = left;
-		}
-		if(outcome == '=') {
-			for(set<int>::iterator it = left.begin(); it != left.end(); it++) {
-				coins[*it-1].reset(GT);
-				coins[*it-1].reset(LT);
+		cin >> outcome;
+		if (outcome == '=') {
+			E_total += 1;
+			for (auto it = left.begin(); it != left.end(); it++) {
+				E[*it - 1] += 1;
 			}
-			for(set<int>::iterator it = right.begin(); it != right.end(); it++) {
-				coins[*it-1].reset(GT);
-				coins[*it-1].reset(LT);
+			for (auto it = right.begin(); it != right.end(); it++) {
+				E[*it - 1] += 1;
+			}
+		} else if (outcome == '<') {
+			IN_total += 1;
+			for (auto it = left.begin(); it != left.end(); it++) {
+				L[*it - 1] += 1;
+			}
+			for (auto it = right.begin(); it != right.end(); it++) {
+				H[*it - 1] += 1;
 			}
 		} else {
-			for(set<int>::iterator it = left.begin(); it != left.end(); it++) {
-				coins[*it-1].reset(GT);
+			IN_total += 1;
+			for (auto it = left.begin(); it != left.end(); it++) {
+				H[*it - 1] += 1;
 			}
-			for(set<int>::iterator it = right.begin(); it != right.end(); it++) {
-				coins[*it-1].reset(LT);
+			for (auto it = right.begin(); it != right.end(); it++) {
+				L[*it - 1] += 1;
 			}
 		}
 	}
 
-	// Now either one coin is heavier or lighter then the rest of coins
-	int c = -1;
-	for(vector<int>::iterator it = coins.begin(); it != coins.end(); it++) {
-
+	int coin = 0;
+	int count = 0;
+	for (unsigned i = 1; i <= n; i++) {
+		int lt = L[i - 1], gt = H[i - 1], eq = E[i - 1];
+		if (eq == 0 && lt == IN_total && gt == 0) {
+			count += 1;
+			coin = i;
+		} else if (eq == 0 && gt == IN_total && lt == 0) {
+			count += 1;
+			coin = i;
+		}
 	}
-	return c;
+	if (count == 1) {
+		cout << coin << endl;
+	} else {
+		cout << 0 << endl;
+	}
 }
 
 int main() {
 	ios_base::sync_with_stdio(false);
 	int t;
 	cin >> t;
-	while(t--) { testcase(); }
+	while (t--) { testcase(); }
 	return 0;
 }
