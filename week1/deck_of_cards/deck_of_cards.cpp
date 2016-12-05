@@ -7,49 +7,51 @@
 using namespace std;
 
 void testcase() {
-	unsigned n, k;
+	long long n, k;
 	cin >> n >> k;
 
-	vector<long> v(n);
-	vector<long> vs(n);
-	for (unsigned i = 0; i < n; i++) {
-		long v_i;
+	vector<long long> v(n);
+	vector<long long> vs(n);
+	for (int i = 0; i < n; i++) {
+		long long v_i;
 		cin >> v_i;
 		v[i] = v_i;
-		vs[i] = v_i + ((i==0) ? 0 : vs[i-1]);
+		vs[i] = v_i + ((i==0) ? 0L : vs[i-1]);
 	}
 
-	vector<long> diff(n);
-	vector<unsigned> j(n);
-	long min_diff = INT64_MAX;
-	for (long i = -1; i < n-1; i++) {
-		auto bias = i == -1 ? 0 : vs[i];
+	vector<long long> diff(n);
+	vector<int> j(n);
+	long long min_diff = INT64_MAX;
+	for (int i = 0; i < n; i++) {
+		auto bias = vs[i]-v[i];
 		auto l = lower_bound(vs.begin()+i, vs.end(), k+bias);
 		auto u = upper_bound(vs.begin()+i, vs.end(), k+bias);
-		if (u == vs.end() || (l != vs.end() && k - *l <= *u - k)) {
-			diff[i+1] = k - (*l-bias);
-			j[i+1] = l - vs.begin();
+//		cout << i << " " << (l - vs.begin()) << " " << (u - vs.begin()) << " " << vs[i] << " " << k << endl;
+		if(l == vs.end()) {
+			// If all values in vs are smaller than k+bias
+			j[i] = n-1;
 		} else {
-			diff[i+1] = (*u-bias) - k;
-			j[i+1] = u - vs.begin();
+			if (u == vs.end()) {
+				j[i] = l - vs.begin();
+			} else { // both l and u exist
+				if (abs(k+bias - *l) <= abs((k+bias) - *u)) {
+					j[i] = l - vs.begin();
+				} else {
+					j[i] = u - vs.begin();
+				}
+			}
 		}
-		min_diff = min(min_diff, abs(diff[i+1]));
+		diff[i] = abs(k+bias - vs[j[i]]);
+		min_diff = min(min_diff, diff[i]);
 	}
-	unsigned i_, j_;
-	for (unsigned i = 0; i < n; i++) {
-		int self_diff = abs(v[i] - k);
-		if (abs(self_diff) <= min_diff) {
-			i_ = i;
-			j_ = i;
-			min_diff = self_diff;
-			break;
-		} else if (min_diff == diff[i]) {
+	int i_, j_;
+	for (int i = 0; i < n; i++) {
+		if (min_diff == diff[i]) {
 			i_ = i;
 			j_ = j[i];
 			break;
 		}
 	}
-
 	cout << i_ << " " << j_ << endl;
 }
 
