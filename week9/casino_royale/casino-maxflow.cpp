@@ -3,10 +3,7 @@
 #include <map>
 #include <algorithm>
 #include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/cycle_canceling.hpp>
-#include <boost/graph/push_relabel_max_flow.hpp>
 #include <boost/graph/successive_shortest_path_nonnegative_weights.hpp>
-#include <boost/graph/find_flow_cost.hpp>
 
 using namespace std;
 using namespace boost;
@@ -88,11 +85,11 @@ void testcase() {
 
 	// Maxflow-mincost
 	successive_shortest_path_nonnegative_weights(G, v_source, n-1);
-	int cost = 0;
+	long cost = 0;
 	// Shift it by length*max_prio
 	EdgeIt e, e_end;
 	for(tie(e, e_end) = edges(G); e != e_end; ++e) {
-		int flow = capacities[*e] - res_capacities[*e];
+		long flow = capacities[*e] - res_capacities[*e];
 		if(flow == 1) {
 			cost += flow * (weights[*e] - max_prio * length_map[*e]);
 		}
