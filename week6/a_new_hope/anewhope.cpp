@@ -57,7 +57,7 @@ long DP_entry(vector<Commando>& C, unsigned s, int c, bitset<14> S) {
 		if ((S & S_cover).none()) { // no overlap => feasible
 			x = S.count() + sum_children(C, s, Cc.children, S);
 		}
-		// Now compute entry for all subsets and take maximum of it
+		// Now compute entry for all (direct) subsets and take maximum of it
 		for (size_t i = 0; i < s; i++) {
 			if (S.test(i)) {
 				bitset<14> S_ = S;
@@ -76,7 +76,7 @@ void DP_compute(vector<Commando>& C, unsigned s, int c) {
 	for(vector<int>::iterator it = Cc.children.begin(); it != Cc.children.end(); it++) {
 		DP_compute(C, s, *it);
 	}
-	// Then compute our entries, start computation at all 1
+	// Then compute our entries, start computation at largest subset
 	DP_entry(C, s, c, bitset<14>((1<<s) - 1));
 }
 
