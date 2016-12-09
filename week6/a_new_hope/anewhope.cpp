@@ -14,19 +14,19 @@ public:
 	vector<long> DP; // INIT to -1
 };
 
-int sum_children(vector<Commando>& C, int s, vector<int>& children, bitset<14> S) {
+int sum_children(vector <Commando> &C, int s, vector<int> &children, bitset<14> S) {
 	int sum = 0;
-	for(vector<int>::iterator it = children.begin(); it != children.end(); it++) {
-		Commando& Cchild = C[*it];
+	for (vector<int>::iterator it = children.begin(); it != children.end(); it++) {
+		Commando &Cchild = C[*it];
 		// Compute covered set
 		bitset<14> covered(0);
-		for(multimap<int, int>::iterator it_ = Cchild.supervised.begin(); it_ != Cchild.supervised.end(); ++it_) {
-			if(S.test(it_->second)) {
+		for (multimap<int, int>::iterator it_ = Cchild.supervised.begin(); it_ != Cchild.supervised.end(); ++it_) {
+			if (S.test(it_->second)) {
 				covered.set(it_->first);
 			}
 		}
 		// flip'em
-		bitset<14> uncovered = covered xor bitset<14>((1<<s) - 1);
+		bitset<14> uncovered = covered xorbitset<14>((1 << s) - 1);
 		sum += Cchild.DP[uncovered.to_ulong()];
 	}
 	return sum;
@@ -37,9 +37,9 @@ int sum_children(vector<Commando>& C, int s, vector<int>& children, bitset<14> S
 // Computing a row of DP for one Commando center c should take
 // O(2^s * s * c), where c is the number of children of said Commando center
 // Since every commando has only one parent, the total runtime is in O(2^s * s * k)
-long DP_entry(vector<Commando>& C, unsigned s, int c, bitset<14> S) {
-	Commando& Cc = C[c];
-	if(Cc.DP[S.to_ulong()] >= 0) {
+long DP_entry(vector <Commando> &C, unsigned s, int c, bitset<14> S) {
+	Commando &Cc = C[c];
+	if (Cc.DP[S.to_ulong()] >= 0) {
 		// Already computed
 		return Cc.DP[S.to_ulong()];
 	} else {
@@ -70,38 +70,38 @@ long DP_entry(vector<Commando>& C, unsigned s, int c, bitset<14> S) {
 	}
 }
 
-void DP_compute(vector<Commando>& C, unsigned s, int c) {
-	Commando& Cc = C[c];
+void DP_compute(vector <Commando> &C, unsigned s, int c) {
+	Commando &Cc = C[c];
 	// Compute children first
-	for(vector<int>::iterator it = Cc.children.begin(); it != Cc.children.end(); it++) {
+	for (vector<int>::iterator it = Cc.children.begin(); it != Cc.children.end(); it++) {
 		DP_compute(C, s, *it);
 	}
 	// Then compute our entries, start computation at largest subset
-	DP_entry(C, s, c, bitset<14>((1<<s) - 1));
+	DP_entry(C, s, c, bitset<14>((1 << s) - 1));
 }
 
 void testcase() {
 	unsigned k, s, m;
 	cin >> k >> s >> m;
 
-	vector<Commando> C(k);
-	for(unsigned i = 0; i < k; i++) {
-		C[i].DP.reserve(1<<s);
-		for(int j = 0; j < 1<<s; j++) {
+	vector <Commando> C(k);
+	for (unsigned i = 0; i < k; i++) {
+		C[i].DP.reserve(1 << s);
+		for (int j = 0; j < 1 << s; j++) {
 			C[i].DP[j] = -1;
 		}
 	}
 
-	for(unsigned i = 0; i < m; i++) {
+	for (unsigned i = 0; i < m; i++) {
 		int u, v, h;
 		cin >> u >> v >> h;
-		if(u != v) {
+		if (u != v) {
 			C[u].children.push_back(v);
 		}
 		for (int j = 0; j < h; j++) {
 			int x, y;
 			cin >> x >> y;
-			if(u != v) {
+			if (u != v) {
 				C[v].supervised.insert(make_pair(y, x));
 			} else {
 				C[u].supervise.insert(make_pair(x, y));
@@ -112,13 +112,13 @@ void testcase() {
 	// Compute for all children:
 	DP_compute(C, s, 0);
 
-	cout << C[0].DP[(1<<s) - 1] << endl;
+	cout << C[0].DP[(1 << s) - 1] << endl;
 }
 
 int main() {
 	ios_base::sync_with_stdio(false);
 	int t;
 	cin >> t;
-	while(t--) { testcase(); }
+	while (t--) { testcase(); }
 	return 0;
 }

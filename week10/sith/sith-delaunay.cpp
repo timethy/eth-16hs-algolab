@@ -10,22 +10,21 @@
 using namespace std;
 using namespace boost;
 
-// Directed graph with integer weights on edges.
-typedef adjacency_list<vecS, vecS, undirectedS, no_property, no_property> Graph;
-typedef graph_traits<Graph>::edge_descriptor Edge;	// Edge type
+typedef adjacency_list <vecS, vecS, undirectedS, no_property, no_property> Graph;
+typedef graph_traits<Graph>::edge_descriptor Edge;
 
 typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
-typedef CGAL::Delaunay_triangulation_2<K> Triangulation;
+typedef CGAL::Delaunay_triangulation_2 <K> Triangulation;
 typedef Triangulation::Edge_iterator Edge_iterator;
 
-int max_connected_component(map<K::Point_2, int>& points, vector<K::Point_2>& planets, int l, long long r_squared) {
+int max_connected_component(map<K::Point_2, int> &points, vector <K::Point_2> &planets, int l, long long r_squared) {
 	size_t V = planets.size() - l;
 	// Build the delaunay triangulation
 	Triangulation t;
 	t.insert(planets.begin() + l, planets.end());
 	// Construct Graph
-    Graph G(V);
-    for (Edge_iterator e = t.finite_edges_begin(); e != t.finite_edges_end(); ++e) {
+	Graph G(V);
+	for (Edge_iterator e = t.finite_edges_begin(); e != t.finite_edges_end(); ++e) {
 		auto source = t.segment(e).source();
 		auto target = t.segment(e).target();
 		if (CGAL::squared_distance(source, target) <= r_squared) {
@@ -61,13 +60,13 @@ void testcase(int t) {
 
 	// Binary search
 	int kl = 1; // the first feasible (one is always feasible)
-	int kr = n/2+1; // the first unfeasible (more than the half is always infeasible)
+	int kr = n / 2 + 1; // the first unfeasible (more than the half is always infeasible)
 	long long r_squared = r;
 	r_squared *= r_squared;
-	while(kr - kl > 1) {
-		int k = kl+(kr-kl)/2;
+	while (kr - kl > 1) {
+		int k = kl + (kr - kl) / 2;
 		int m = max_connected_component(points, planets, k, r_squared);
-		if(k <= m) {
+		if (k <= m) {
 			kl = k;
 		} else {
 			kr = k;
@@ -77,7 +76,7 @@ void testcase(int t) {
 	cout << kl << endl;
 }
 
-int main (void) {
+int main(void) {
 	cin.sync_with_stdio(false);
 	cout.sync_with_stdio(false);
 

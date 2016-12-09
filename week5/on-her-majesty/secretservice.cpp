@@ -87,7 +87,8 @@ void testcase() {
 		vector<int> distances(V);
 		dijkstra_shortest_paths(G, as[i],
 		                        predecessor_map(make_iterator_property_map(predecessors.begin(), get(vertex_index, G))).
-				                        distance_map(make_iterator_property_map(distances.begin(), get(vertex_index, G))));
+				                        distance_map(make_iterator_property_map(distances.begin(),
+				                                                                get(vertex_index, G))));
 		for(int j = 0; j < s; j++) {
 			a_to_s.insert(make_pair(distances[n+j], make_pair(i, j)));
 			a_to_s_.insert(make_pair(make_pair(i, j), distances[n+j]));
@@ -103,4 +104,3 @@ int main() {
 	while(t--) { testcase(); }
 	return 0;
 }
-

@@ -2,33 +2,32 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-// BGL includes
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/connected_components.hpp>
 
 using namespace std;
 using namespace boost;
 
-// Directed graph with integer weights on edges.
-typedef adjacency_list<vecS, vecS, undirectedS, no_property, no_property> Graph;
-typedef graph_traits<Graph>::vertex_descriptor Vertex;	// Vertex type		
-typedef graph_traits<Graph>::edge_descriptor Edge;	// Edge type
+typedef adjacency_list <vecS, vecS, undirectedS, no_property, no_property> Graph;
+typedef graph_traits<Graph>::vertex_descriptor Vertex;
+typedef graph_traits<Graph>::edge_descriptor Edge;
 
 double dist_squared(int x1, int y1, int x2, int y2) {
-	double xd = (x2-x1);
-	double yd = (y2-y1);
-	return sqrt(xd*xd + yd*yd);
+	double xd = (x2 - x1);
+	double yd = (y2 - y1);
+	return sqrt(xd * xd + yd * yd);
 }
 
-int max_connected_component(vector<vector<int>>& adj, int l, int n) {
-	int V = n-l;
+int max_connected_component(vector <vector<int>> &adj, int l, int n) {
+	int V = n - l;
 	Graph G(V);
 	// Build graph
 	for (int i = l; i < n; i++) {
 		for (vector<int>::iterator it = adj[i].begin(); it != adj[i].end(); ++it) {
-			Edge e; bool success;
-			tie(e, success) = add_edge(i-l, *it-l, G);
-			tie(e, success) = add_edge(*it-l, i-l, G);
+			Edge e;
+			bool success;
+			tie(e, success) = add_edge(i - l, *it - l, G);
+			tie(e, success) = add_edge(*it - l, i - l, G);
 		}
 	}
 	// Find connected components
@@ -50,18 +49,18 @@ void testcase(int t) {
 	vector<int> xs(n);
 	vector<int> ys(n);
 
-	vector<vector<int>> adj(n);
-	
+	vector <vector<int>> adj(n);
+
 	for (int i = 0; i < n; i++) {
 		int x, y;
 		cin >> x >> y;
 		xs[i] = x;
 		ys[i] = y;
 	}
-	
+
 	// Reachabilities
 	for (int i = 0; i < n; i++) {
-		for (int j = i+1; j < n; j++) {
+		for (int j = i + 1; j < n; j++) {
 			if (dist_squared(xs[i], ys[i], xs[j], ys[j]) <= r) {
 				// For every node store edges referring to later edges:
 				adj[i].push_back(j);
@@ -71,11 +70,11 @@ void testcase(int t) {
 
 	// Binary search
 	int kl = 0; // the first feasible
-	int kr = n/2+1; // the first unfeasible
-	while(kr - kl > 1) {
-		int k = kl+(kr-kl)/2;
+	int kr = n / 2 + 1; // the first unfeasible
+	while (kr - kl > 1) {
+		int k = kl + (kr - kl) / 2;
 		int m = max_connected_component(adj, k, n);
-		if(k <= m) {
+		if (k <= m) {
 			kl = k;
 		} else {
 			kr = k;
@@ -85,7 +84,7 @@ void testcase(int t) {
 	cout << kl << endl;
 }
 
-int main (void) {
+int main(void) {
 	cin.sync_with_stdio(false);
 	cout.sync_with_stdio(false);
 

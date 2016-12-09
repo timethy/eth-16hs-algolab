@@ -18,7 +18,7 @@ typedef adjacency_list<vecS, vecS, directedS, no_property,
     property<edge_capacity_t, long,
         property<edge_residual_capacity_t, long,
             property<edge_reverse_t, Traits::edge_descriptor,
-                property <edge_weight_t, long> > > > > Graph;
+                property <edge_weight_t, long>>>>> Graph;
 // Interior Property Maps
 typedef property_map<Graph, edge_capacity_t>::type      EdgeCapacityMap;
 typedef property_map<Graph, edge_weight_t >::type       EdgeWeightMap;
@@ -110,7 +110,7 @@ void testcase() {
 	for (unsigned i = 0; i < S; i++) {
 		// Initial flow is l_i
 		ea.addEdge(v_source, node_idx[make_pair(i, *time[i].begin())], l[i], 0);
-		// Add edge of "infinite" capacity and priority 0 for cars staying
+		// Add edge of "infinite" capacity and priority max_p*duration for cars staying
 		for (set<int>::iterator it = time[i].begin();
 		    it != time[i].end(); ++it) {
 			set<int>::iterator it_next = it;

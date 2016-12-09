@@ -7,6 +7,8 @@
 
 using namespace std;
 
+// MESSY, incompleted ideas:
+
 /*
 int combinations(int a, vector<unsigned> &ls, bitset<20> used, int edge) {
 	if(edge == 4) {

@@ -17,7 +17,7 @@ void testcase() {
 	cin >> n >> k;
 
 	int IN_total = 0, E_total = 0;
-	// (coin#id - 1) -> number of L, H, E measurements
+	// (coin.id - 1) -> number of L, H, E measurements
 	vector<int> L(n, 0), H(n, 0), E(n, 0);
 
 	for (unsigned i = 0; i < k; i++) {

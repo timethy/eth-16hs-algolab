@@ -5,18 +5,15 @@
 #include <set>
 #include <algorithm>
 
-// TODO: BGL
-// TODO: CGAL
-
 using namespace std;
 
 void testcase() {
 	unsigned n;
 	cin >> n;
 
-	vector<vector<int>> X(n, vector<int>(n));
-	vector<vector<int>> sums(n, vector<int>(n));
-	// TODO Why is it so slow with maps?
+	vector <vector<int>> X(n, vector<int>(n));
+	vector <vector<int>> sums(n, vector<int>(n));
+	// TODO: Why is it so slow with maps?
 	//map<int, map<int, int>> sums;
 	int n_pairs = 0;
 
@@ -34,23 +31,23 @@ void testcase() {
 		}
 	}
 
-	// Just sum up all possiblities
+	// Just sum up all possibilities
 	for (unsigned i_start = 0; i_start < n; ++i_start) {
 		for (unsigned i_end = i_start; i_end < n; ++i_end) {
 			int even = 0;
 			int odd = 0;
 			for (unsigned j = 0; j < n; j++) {
-				int sum = sums[j][i_end] - (i_start == 0 ? 0 : sums[j][i_start-1]);
-				if(j == 0) {
-					if(sum % 2 == 0) { even = 1; }
+				int sum = sums[j][i_end] - (i_start == 0 ? 0 : sums[j][i_start - 1]);
+				if (j == 0) {
+					if (sum % 2 == 0) { even = 1; }
 					else { odd = 1; }
 				} else {
-					if(sum % 2 == 0) {
+					if (sum % 2 == 0) {
 						even += 1;
 					} else {
 						int tmp = even;
 						even = odd;
-						odd = tmp+1;
+						odd = tmp + 1;
 					}
 				}
 				n_pairs += even;
