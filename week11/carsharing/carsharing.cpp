@@ -89,6 +89,7 @@ void testcase() {
 	// Two more nodes for the sink
 	const int v_source = v_idx;
 	const int v_sink = v_idx + 1;
+	// MAX > MAX_BOOKINGS + MAX_INITIAL_CAPACITY
 	const int MAX = 10000+100+1;
 
 	Graph G(v_idx + 2);
@@ -128,12 +129,7 @@ void testcase() {
 		}
 	}
 
-	// Maxflow-mincost
-	/*push_relabel_max_flow(G, v_source, v_sink);
-	cycle_canceling(G);
-	int cost = find_flow_cost(G);*/
-
-	// Maxflow-mincost
+	// Mincost - Maxflow
 	successive_shortest_path_nonnegative_weights(G, v_source, v_sink);
 	long cost = 0;
 	// Shift it by length*max_p
