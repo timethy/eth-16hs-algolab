@@ -65,15 +65,15 @@ void testcase() {
 	vector<int> d(N);
 	vector<int> a(N);
 	vector<int> p(N);
-//	vector<set<int>> arrs(S);
-//	vector<set<int>> deps(S);
 	vector<set<int>> time(S);
+	int max_p = 0;
+	int max_t = 0;
 	for (unsigned i = 0; i < N; i++) {
 		cin >> s[i] >> t[i] >> d[i] >> a[i] >> p[i];
-//		deps[s[i]].insert(d[i]);
-//		arrs[t[i]].insert(a[i]);
 		time[s[i]-1].insert(d[i]);
 		time[t[i]-1].insert(a[i]);
+		max_p = max(max_p, p[i]);
+		max_t = max(max_t, a[i]);
 	}
 
 	// For every station create the nodes
@@ -97,10 +97,14 @@ void testcase() {
     ReverseEdgeMap rev = get(edge_reverse, G);
 	ResidualCapacityMap res_capacities = get(edge_residual_capacity, G);
     EdgeAdder ea(G, capacities, weights, rev);
+
+	map<Edge, int> length_map;
 	// Add edge of capacity 1, priority -p_i for every booking
 	for (unsigned i = 0; i < N; i++) {
-		ea.addEdge(node_idx[make_pair(s[i]-1, d[i])],
-		           node_idx[make_pair(t[i]-1, a[i])], 1, -p[i]);
+		int duration = a[i] - d[i];
+		Edge e = ea.addEdge(node_idx[make_pair(s[i]-1, d[i])],
+		                    node_idx[make_pair(t[i]-1, a[i])], 1, max_p*duration-p[i]);
+		length_map.insert(make_pair(e, duration));
 	}
 	for (unsigned i = 0; i < S; i++) {
 		// Initial flow is l_i
@@ -111,19 +115,35 @@ void testcase() {
 			set<int>::iterator it_next = it;
 			it_next++;
 			if(it_next == time[i].end()) {
+				int duration = max_t - *it;
 				// last station give infinite capacity edge to sink
-				ea.addEdge(node_idx[make_pair(i, *it)], v_sink, MAX, 0);
+				Edge e = ea.addEdge(node_idx[make_pair(i, *it)], v_sink, MAX, max_p*duration);
+				length_map.insert(make_pair(e, duration));
 			} else {
-				ea.addEdge(node_idx[make_pair(i, *it)],
-				           node_idx[make_pair(i, *it_next)], MAX, 0);
+				int duration = *it_next - *it;
+				Edge e = ea.addEdge(node_idx[make_pair(i, *it)],
+				                    node_idx[make_pair(i, *it_next)], MAX, max_p*duration);
+				length_map.insert(make_pair(e, duration));
 			}
 		}
 	}
 
 	// Maxflow-mincost
-	push_relabel_max_flow(G, v_source, v_sink);
+	/*push_relabel_max_flow(G, v_source, v_sink);
 	cycle_canceling(G);
-	int cost = find_flow_cost(G);
+	int cost = find_flow_cost(G);*/
+
+	// Maxflow-mincost
+	successive_shortest_path_nonnegative_weights(G, v_source, v_sink);
+	long cost = 0;
+	// Shift it by length*max_p
+	EdgeIt e, e_end;
+	for(tie(e, e_end) = edges(G); e != e_end; ++e) {
+		long flow = capacities[*e] - res_capacities[*e];
+		if(flow == 1) {
+			cost += flow * (weights[*e] - max_p * length_map[*e]);
+		}
+	}
 
 	cout << -cost << endl;
 }
