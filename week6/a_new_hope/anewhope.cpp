@@ -27,11 +27,6 @@ int sum_children(vector<Commando>& C, int s, vector<int>& children, bitset<14> S
 		}
 		// flip'em
 		bitset<14> uncovered = covered xor bitset<14>((1<<s) - 1);
-/*		cout << "c=" << *it << endl;
-		cout << S << endl;
-		cout << covered << endl;
-		cout << uncovered << endl;
-		cout << "----" << endl;*/
 		sum += Cchild.DP[uncovered.to_ulong()];
 	}
 	return sum;
@@ -39,6 +34,9 @@ int sum_children(vector<Commando>& C, int s, vector<int>& children, bitset<14> S
 
 // DP(c, S): One entry means how many troopers can be controlled in that subtree.
 // (with the given subset S of troopers in the root)
+// Computing a row of DP for one Commando center c should take
+// O(2^s * s * c), where c is the number of children of said Commando center
+// Since every commando has only one parent, the total runtime is in O(2^s * s * k)
 long DP_entry(vector<Commando>& C, unsigned s, int c, bitset<14> S) {
 	Commando& Cc = C[c];
 	if(Cc.DP[S.to_ulong()] >= 0) {
@@ -57,7 +55,6 @@ long DP_entry(vector<Commando>& C, unsigned s, int c, bitset<14> S) {
 		}
 		long x = 0;
 		if ((S & S_cover).none()) { // no overlap => feasible
-//			cout << "c=" << c << ",S=" << S << " is feasible." << endl;
 			x = S.count() + sum_children(C, s, Cc.children, S);
 		}
 		// Now compute entry for all subsets and take maximum of it
@@ -79,7 +76,7 @@ void DP_compute(vector<Commando>& C, unsigned s, int c) {
 	for(vector<int>::iterator it = Cc.children.begin(); it != Cc.children.end(); it++) {
 		DP_compute(C, s, *it);
 	}
-	// Then compute our entries
+	// Then compute our entries, start computation at all 1
 	DP_entry(C, s, c, bitset<14>((1<<s) - 1));
 }
 
