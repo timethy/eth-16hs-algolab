@@ -4,16 +4,33 @@
 #include <map>
 #include <algorithm>
 
-// TODO: BGL
-// TODO: CGAL
-
 using namespace std;
 
 void testcase() {
 	unsigned n;
 	cin >> n;
 
-	cout << 0 << endl;
+	vector<unsigned> t(n);
+	for(unsigned i = 0; i < n; i++) {
+		cin >> t[i];
+	}
+	// Preprocess deadlines
+	for (unsigned i = 0; i <= (n-3)/2; i++) {
+		t[2*i+1] = min(t[2*i+1], t[i]-1);
+		t[2*i+2] = min(t[2*i+2], t[i]-1);
+	}
+	sort(t.begin(), t.end());
+	// compare to [1,...,n]
+	bool ok = true;
+	for(unsigned i = 0; i < n; i++) {
+		ok &= t[i] >= i + 1;
+	}
+
+	if(ok) {
+		cout << "yes" << endl;
+	} else {
+		cout << "no" << endl;
+	}
 }
 
 int main() {

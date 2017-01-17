@@ -16,12 +16,12 @@ The test files (including reference outputs) are provided as part of the course.
   * Even Pairs 100/100
   * False coin 100/100
   * PotW: *Deck of cards* 80/100
-2. week (0/5)
-  * PotW: Octopussy
+2. week (1/5)
+  * PotW: Octopussy 100/100
 3. week (0/5)
-  * PotW: Attack of the clones
+  * PotW: *Attack of the clones*
 4. week (0/5)
-  * PotW: TheeV
+  * PotW: *TheeV*
 5. week (2/5)
   * PotW(A): On her Majesty's secret service 100/100
   * PotW(B): Poker Chips 100/100
@@ -34,9 +34,9 @@ The test files (including reference outputs) are provided as part of the course.
 9. week
   * PotW: Casino Royale 80/80
 10. week
-  * PotW: Sith 100
+  * PotW: Sith 100/100
 11. week
-  * Carsharing 100
+  * Carsharing 100/100
   * PotW: Planks 60/100
 12. week (0/6)
 13. week (0/4)
