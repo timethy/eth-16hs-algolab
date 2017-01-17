@@ -12,6 +12,5 @@ CMakeCache.txt
 CMakeFiles
 Makefile
 
-.pdf
-
+*.pdf
 
