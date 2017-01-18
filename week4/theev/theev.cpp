@@ -65,14 +65,12 @@ void testcase() {
 		Min_circle mc(P.begin() + (k + 1), P.end(), true);
 		Traits::Circle c = mc.circle();
 		r_k = c.squared_radius();
-		cout << "n" << n << endl;
 	}
 	K::FT r_k1_ = squared_distance(P0, P0);
 	if(n > 2) {
 		Min_circle mc(P.begin() + (k + 2), P.end(), true);
 		Traits::Circle c = mc.circle();
 		r_k1_ = c.squared_radius();
-		cout << "n" << n << endl;
 	}
 	K::FT r_k_ = squared_distance(P0, P[k]);
 	K::FT r_k1 = squared_distance(P0, P[k+1]);
