@@ -8,7 +8,6 @@
 #include <CGAL/QP_models.h>
 #include <CGAL/QP_functions.h>
 //#include <CGAL/Gmpz.h>
-// choose exact integral type
 //typedef CGAL::Gmpz ET;
 
 #include <CGAL/MP_Float.h>
@@ -19,7 +18,7 @@ using namespace std;
 typedef long long dist;
 
 // program and solution types
-typedef CGAL::Quadratic_program<int> Program;
+typedef CGAL::Quadratic_program<double> Program;
 typedef CGAL::Quadratic_program_solution <ET> Solution;
 
 dist distance(dist x1, dist y1, dist x2, dist y2) {
@@ -53,7 +52,6 @@ void testcase() {
 			dist d = distance(b_x[j], b_y[j], s_x[i], s_y[i]);
 			dist2 = min(dist2, d);
 		}
-		cout << "nearest: " << dist2 << endl;
 		for (unsigned j = 0; j < a; j++) {
 			dist d = distance(p_x[j], p_y[j], s_x[i], s_y[i]);
 			if (d < dist2) {
@@ -62,11 +60,15 @@ void testcase() {
 		}
 	}
 
+	bool infeasible = false;
 	// by default, we have a nonnegative LP with Ax >= b
-	Program lp(CGAL::GREATER, true, 0, false, 0);
+	Program lp(CGAL::LARGER, true, 0, false, 0);
 	// now set the non-default entries
 	for (unsigned i = 0; i < a; i++) {
-		cout << "affected: " << p_affected[i].size() << endl;
+		if (p_affected[i].size() == 0) {
+			infeasible = true;
+			break;
+		}
 		for (auto it = p_affected[i].begin(); it != p_affected[i].end(); ++it) {
 			unsigned j = *it;
 			dist d = distance(p_x[i], p_y[i], s_x[j], s_y[j]);
@@ -74,24 +76,25 @@ void testcase() {
 				d = 1;
 			}
 			double d_inv = 1.0 / ((double) d);
-			cout << d_inv << endl;
 			lp.set_a(j, i, d_inv);
 		}
 		lp.set_b(i, rho[i]);
 	}
-	for (unsigned i = 0; i < s; i++) {
-		lp.set_c(i, 1);
-	}
+	if(!infeasible) {
+		for (unsigned i = 0; i < s; i++) {
+			lp.set_c(i, 1);
+		}
 
-	Solution sol = CGAL::solve_linear_program(lp, ET());
+		Solution sol = CGAL::solve_linear_program(lp, ET());
 //	assert(sol.solves_linear_program(lp));
 
-	if (sol.is_infeasible()) {
-		cout << "n" << endl;
+		if (!sol.is_infeasible() && to_double(sol.objective_value()) <= e) {
+			cout << "y" << endl;
+		} else {
+			cout << "n" << endl;
+		}
 	} else {
-		cout << e << endl;
-		cout << sol.objective_value() << endl;
-		cout << "y" << endl;
+		cout << "n" << endl;
 	}
 }
 
@@ -102,3 +105,4 @@ int main() {
 	while (t--) { testcase(); }
 	return 0;
 }
+
