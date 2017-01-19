@@ -7,6 +7,8 @@
 #include <CGAL/basic.h>
 #include <CGAL/QP_models.h>
 #include <CGAL/QP_functions.h>
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Delaunay_triangulation_2.h>
 //#include <CGAL/Gmpz.h>
 //typedef CGAL::Gmpz ET;
 
@@ -20,6 +22,11 @@ typedef long long dist;
 // program and solution types
 typedef CGAL::Quadratic_program<double> Program;
 typedef CGAL::Quadratic_program_solution <ET> Solution;
+
+typedef CGAL::Exact_predicates_inexact_constructions_kernel K;
+typedef CGAL::Delaunay_triangulation_2<K> Delaunay;
+typedef Delaunay::Point Point;
+typedef Delaunay::Vertex_handle Vhandle;
 
 dist distance(dist x1, dist y1, dist x2, dist y2) {
 	return (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
@@ -38,19 +45,25 @@ void testcase() {
 	for (unsigned i = 0; i < s; i++) {
 		cin >> s_x[i] >> s_y[i];
 	}
-	vector <dist> b_x(b), b_y(b);
+
+	vector <Point> b_p(b);
 	for (unsigned i = 0; i < b; i++) {
-		cin >> b_x[i] >> b_y[i];
+		cin >> b_p[i];
 	}
 
+	Delaunay triangulation;
+	triangulation.insert(b_p.begin(), b_p.end());
+
+	vector <dist> min_dist2(s);
 	vector <vector<unsigned>> p_affected(a);
 	// Find affectable for every shooting position
 	for (unsigned i = 0; i < s; i++) {
 		// Find nearest bounty hunter
 		dist dist2 = LLONG_MAX;
-		for (unsigned j = 0; j < b; j++) {
-			dist d = distance(b_x[j], b_y[j], s_x[i], s_y[i]);
-			dist2 = min(dist2, d);
+		if (b != 0) {
+			Point p = Point(s_x[i], s_y[i]);
+			Vhandle closest = triangulation.nearest_vertex(p);
+			dist2 = CGAL::squared_distance(closest->point(), p);
 		}
 		for (unsigned j = 0; j < a; j++) {
 			dist d = distance(p_x[j], p_y[j], s_x[i], s_y[i]);
