@@ -13,12 +13,23 @@ void testcase() {
 	cin >> n;
 
 	vector<int> a(n), b(n);
+	vector<int> Sa(n), Sb(n);
 
 	for (unsigned i = 0; i < n; i++) {
 		cin >> a[i];
+		if(i == 0) {
+			Sa[i] = a[i];
+		} else {
+			Sa[i] = Sa[i - 1] + a[i];
+		}
 	}
 	for (unsigned i = 0; i < n; i++) {
 		cin >> b[i];
+		if(i == 0) {
+			Sb[i] = b[i];
+		} else {
+			Sb[i] = Sb[i - 1] + b[i];
+		}
 	}
 
 	vector <vector<int>> DP(n+1);
@@ -35,9 +46,11 @@ void testcase() {
 				for (unsigned j_ = 0; j_ < j; j_++) {
 					// Make sure, not one stack is empty at the end (without the other being empty)
 					if ((i_ == 0 && j_ == 0) || (i_ != 0 && j_ != 0)) {
-						int Sa = accumulate(a.begin() + i_, a.begin() + i, 0);
-						int Sb = accumulate(b.begin() + j_, b.begin() + j, 0);
-						int cost = DP[i_][j_] + (Sa - (i - i_)) * (Sb - (j - j_));
+						int Sa_ = Sa[i-1];
+						int Sb_ = Sb[j-1];
+						if(i_ > 0) { Sa_ -= Sa[i_-1]; }
+						if(j_ > 0) { Sb_ -= Sb[j_-1]; }
+						int cost = DP[i_][j_] + (Sa_ - (i - i_)) * (Sb_ - (j - j_));
 						min_cost = min(min_cost, cost);
 					}
 				}
