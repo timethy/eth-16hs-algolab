@@ -38,8 +38,8 @@ The test files (including reference outputs) are provided as part of the course.
 11. week
   * Carsharing 100/100
   * PotW: Planks 60/100
-12. week (0/6)
-  * PotW: The Empire Strikes Back /100
+12. week (1/6)
+  * PotW: The Empire Strikes Back 100/100
 13. week (0.5/4)
   * DHL 60/100
   * PotW:

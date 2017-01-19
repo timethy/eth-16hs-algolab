@@ -73,15 +73,8 @@ void testcase() {
 		}
 	}
 
-	bool infeasible = false;
-	// by default, we have a nonnegative LP with Ax >= b
 	Program lp(CGAL::LARGER, true, 0, false, 0);
-	// now set the non-default entries
 	for (unsigned i = 0; i < a; i++) {
-		if (p_affected[i].size() == 0) {
-			infeasible = true;
-			break;
-		}
 		for (auto it = p_affected[i].begin(); it != p_affected[i].end(); ++it) {
 			unsigned j = *it;
 			dist d = distance(p_x[i], p_y[i], s_x[j], s_y[j]);
@@ -93,19 +86,15 @@ void testcase() {
 		}
 		lp.set_b(i, rho[i]);
 	}
-	if(!infeasible) {
-		for (unsigned i = 0; i < s; i++) {
-			lp.set_c(i, 1);
-		}
 
-		Solution sol = CGAL::solve_linear_program(lp, ET());
-//	assert(sol.solves_linear_program(lp));
+	for (unsigned i = 0; i < s; i++) {
+		lp.set_c(i, 1);
+	}
 
-		if (!sol.is_infeasible() && to_double(sol.objective_value()) <= e) {
-			cout << "y" << endl;
-		} else {
-			cout << "n" << endl;
-		}
+	Solution sol = CGAL::solve_linear_program(lp, ET());
+
+	if (!sol.is_infeasible() && to_double(sol.objective_value()) <= e) {
+		cout << "y" << endl;
 	} else {
 		cout << "n" << endl;
 	}
