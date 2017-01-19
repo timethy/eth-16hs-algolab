@@ -6,72 +6,80 @@
 
 using namespace std;
 
+int schedule(vector<vector<int>> &jedi, vector<int> &overlapping, int a_min, int b_max) {
+	int a = a_min;
+	int count = 0;
+	for(auto it = jedi.begin(); it != jedi.end(); ++it) {
+		vector<int> j = *it;
+		auto overlaps = find(overlapping.begin(), overlapping.end(), j[0]);
+		if(overlaps == overlapping.end()) {
+			if(a <= j[1] && j[2] < b_max) {
+				a = j[2]+1;
+				count += 1;
+			}
+		}
+	}
+	return count;
+}
+
 void testcase() {
 	unsigned n, m;
 	cin >> n >> m;
 
 	vector<vector<int>> jedi(n);
+	multimap<int, int> jedi_a;
 
 	for(unsigned i = 0; i < n; i++) {
 		int a, b;
 		cin >> a >> b;
 		jedi[i].push_back(i);
-		jedi[i].push_back(a);
-		jedi[i].push_back(b);
-	}
-	sort(jedi.begin(), jedi.end(), [](vector<int> v1, vector<int> v2) {
-		return v1[1] < v2[1];
-	});
-	int n_segment = 0;
-	int a_ = 0, b_ = 0;
-	// TODO: Overlapping is wrong
-	multimap<int,int> bs;
-	vector<unsigned> overlapping;
-	for(unsigned i = 0; i <= n; i++) {
-		unsigned j = jedi[i][0];
-		int a = jedi[i][1];
-		int b = jedi[i][2];
-		// Delete all with b <= a
-		auto end = b_inv.lower_bound(a);
-		n_segment -= distance(b_inv.begin(), end);
-		b_inv.erase(b_inv.begin(), end);
-		b_inv.insert(make_pair(b, j));
-		n_segment += 1;
-		if(a_ < a && n_segment <= 10) {
-			for(auto it = a_inv.begin(); it != a_inv.end(); it++) {
-				overlapping.push_back(it->second);
-			}
-			break;
-		}
-		a_ = a;
-	}
-	for (unsigned i = 0; i < n; i++) {
-		jedi[i][2] = (m - b_ + jedi[i][2]) % m;
-		jedi[i][1] = (m - b_ + jedi[i][1]) % m;
-	}
-	sort(jedi.begin(), jedi.end(), [](vector<int> v1, vector<int> v2) {
-		return v1[2] < v2[2];
-	});
-	int n_min = n;
-	cout << overlapping.size() << endl;
-	for(unsigned o = 0; o < overlapping.size(); o++) {
-		int n_fight = 0;
-		b_ = 0;
-		for (unsigned i = 0; i < n; i++) {
-			int a = jedi[i][1];
-			int b = jedi[i][2];
-			bool no_overlap = overlapping.end() == find(overlapping.begin(), overlapping.end(), i);
-			if((i == overlapping[o]) || no_overlap) {
-				if (a >= b_) {
-					b_ = b;
-					n_fight += 1;
-				}
-			}
-		}
-		n_min = min(n_min, n_fight);
+		jedi[i].push_back(a-1);
+		jedi[i].push_back(b-1);
+//		jedi_a.insert(make_pair(a, i));
+//		jedi_a.insert(make_pair(b, i));
 	}
 
-	cout << n_min << endl;
+	int i_10 = 0;
+/*	for(unsigned i = 0; i < n; i++) {
+		auto it_start = jedi_a.lower_bound(jedi[i][1]);
+		auto it_end = jedi_a.upper_bound(jedi[i][2]);
+		auto it = it_start;
+		int count = 0;
+		while(it != it_end && count <= 20) {
+			it++;
+			count += 1;
+		}
+		if(count <= 20) {
+			i_10 = i;
+			break;
+		}
+	}*/
+
+	int a0 = jedi[i_10][1];
+	for(unsigned i = 0; i < n; i++) {
+		cout << a0 << " " << jedi[i][1] << " " << jedi[i][2] << endl;
+		jedi[i][1] = (m + jedi[i][1] - a0) % m;
+		jedi[i][2] = (m + jedi[i][2] - a0) % m;
+		cout << a0 << " " << jedi[i][1] << " " << jedi[i][2] << endl;
+	}
+	auto it_start = jedi_a.lower_bound(jedi[i_10][1]);
+	auto it_end = jedi_a.upper_bound(jedi[i_10][2]);
+	vector<int> overlapping;
+	for(auto it = it_start; it != it_end; it++) {
+		overlapping.push_back(it->second);
+	}
+
+	sort(jedi.begin(), jedi.end(), [](vector<int> j1, vector<int> j2) {
+		return j1[2] < j2[2];
+	});
+
+	int c = schedule(jedi, overlapping, 0, m);
+	for(auto it = overlapping.begin(); it != overlapping.end(); it++) {
+		vector<int> j = jedi[*it];
+		c = max(schedule(jedi, overlapping, j[1], j[2])+1,c);
+	}
+
+	cout << c << endl;
 }
 
 int main() {
