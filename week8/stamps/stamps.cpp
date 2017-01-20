@@ -16,7 +16,7 @@ typedef CGAL::Gmpq ET;
 using namespace std;
 
 // program and solution types
-typedef CGAL::Quadratic_program<ET> Program;
+typedef CGAL::Quadratic_program<double> Program;
 typedef CGAL::Quadratic_program_solution <ET> Solution;
 
 typedef K::Point_2 Point;
@@ -62,12 +62,11 @@ void testcase() {
 	// Construct the linear program Ax <= b, x = [I_j]
 	Program lp(CGAL::SMALLER, true, 1, true, 4096);
 	for (unsigned j = 0; j < s; j++) {
-//		cout << illuminated[j].size() << endl;
 		for (auto it = illuminated[j].begin(); it != illuminated[j].end(); ++it) {
 			unsigned i = *it;
 			auto r2 = CGAL::squared_distance(lamps[i], stamps[j]);
-			lp.set_a(i, 2*j,   1/ET(r2));
-			lp.set_a(i, 2*j+1, 1/ET(r2));
+			lp.set_a(i, 2*j,   1.0/CGAL::to_double(r2));
+			lp.set_a(i, 2*j+1, 1.0/CGAL::to_double(r2));
 		}
 		lp.set_b(2*j,   M[j]);
 		lp.set_b(2*j+1, 1);
@@ -77,7 +76,6 @@ void testcase() {
 	}
 
 	Solution sol = CGAL::solve_linear_program(lp, ET());
-//	cout << sol << endl;
 	if(sol.is_infeasible()) {
 		cout << "no" << endl;
 	} else {
