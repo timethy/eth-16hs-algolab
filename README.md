@@ -42,7 +42,7 @@ The test files (including reference outputs) are provided as part of the course.
   * PotW: The Empire Strikes Back 100/100
 13. week (0.5/4)
   * DHL 60/100
-  * PotW:
+  * PotW: The Phantom Menace /100
 14. week: Christmas Challenge (0/1)
 
 
