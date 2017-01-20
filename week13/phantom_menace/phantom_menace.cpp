@@ -13,9 +13,8 @@ using namespace boost;
 typedef adjacency_list_traits <vecS, vecS, directedS> Traits;
 typedef adjacency_list <vecS, vecS, directedS, no_property,
 property<edge_capacity_t, long,
-		property < edge_residual_capacity_t, long,
-		property < edge_reverse_t, Traits::edge_descriptor>> > >
-Graph;
+		property <edge_residual_capacity_t, long,
+		property <edge_reverse_t, Traits::edge_descriptor>>>> Graph;
 typedef property_map<Graph, edge_capacity_t>::type EdgeCapacityMap;
 typedef property_map<Graph, edge_residual_capacity_t>::type ResidualCapacityMap;
 typedef property_map<Graph, edge_reverse_t>::type ReverseEdgeMap;
