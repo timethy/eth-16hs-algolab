@@ -68,7 +68,7 @@ The test files (including reference outputs) are provided as part of the course.
 7. week (1/5)
   * PotW: Knights 100/100 -- Max flow
 8. week (1/5)
-  * PotW: *Stamps* 0/100 -- LP
+  * PotW: Stamps 100/100 -- LP
 9. week
   * PotW: Casino Royale 80/80 -- Mincost Max-flow; tricky bias
 10. week

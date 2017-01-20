@@ -7,6 +7,7 @@
 #include <CGAL/basic.h>
 #include <CGAL/QP_models.h>
 #include <CGAL/QP_functions.h>
+// Can also use Gmpqz
 #include <CGAL/Gmpq.h>
 #include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
 
