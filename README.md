@@ -43,7 +43,33 @@ The test files (including reference outputs) are provided as part of the course.
 
 
 
-(... spoilers below)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(... spoilers now)
 
 ## Solved Problems (careful spoilers)
 
