@@ -150,8 +150,8 @@ The test files (including reference outputs) are provided as part of the course.
   * PotW: *Deck of cards* 80/100
 2. week (1/5)
   * PotW: Octopussy 100/100 -- EDF* (*= with dependencies)
-3. week (0/5)
-  * PotW: *Attack of the clones* 0/100 -- EDF scheduling
+3. week (1/5)
+  * PotW: *Attack of the clones* 100/100 -- EDF scheduling; index-tricks
 4. week (0.5/5)
   * PotW: *TheeV* 0/100 -- Binary search, Minball?
 5. week (2/5)
