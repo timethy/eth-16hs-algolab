@@ -6,20 +6,17 @@
 
 using namespace std;
 
-int schedule(vector<vector<int>> &jedi, vector<int> &overlapping, int a_min, int b_max) {
+int EDF(vector<vector<int>>& jedis, int a_min, int b_max) {
 	int a = a_min;
-	int count = 0;
-	for(auto it = jedi.begin(); it != jedi.end(); ++it) {
-		vector<int> j = *it;
-		auto overlaps = find(overlapping.begin(), overlapping.end(), j[0]);
-		if(overlaps == overlapping.end()) {
-			if(a <= j[1] && j[2] < b_max) {
-				a = j[2]+1;
-				count += 1;
-			}
+	int n = 0;
+	for(auto it = jedis.begin(); it != jedis.end(); ++it) {
+		if((*it)[1] > a && (*it)[2] < b_max) {
+			// Schedule
+			a = (*it)[2];
+			n += 1;
 		}
 	}
-	return count;
+	return n;
 }
 
 void testcase() {
@@ -27,59 +24,77 @@ void testcase() {
 	cin >> n >> m;
 
 	vector<vector<int>> jedi(n);
-	multimap<int, int> jedi_a;
 
 	for(unsigned i = 0; i < n; i++) {
 		int a, b;
 		cin >> a >> b;
 		jedi[i].push_back(i);
+		// 0-based indexing
 		jedi[i].push_back(a-1);
 		jedi[i].push_back(b-1);
-//		jedi_a.insert(make_pair(a, i));
-//		jedi_a.insert(make_pair(b, i));
 	}
 
-	int i_10 = 0;
-/*	for(unsigned i = 0; i < n; i++) {
-		auto it_start = jedi_a.lower_bound(jedi[i][1]);
-		auto it_end = jedi_a.upper_bound(jedi[i][2]);
-		auto it = it_start;
-		int count = 0;
-		while(it != it_end && count <= 20) {
-			it++;
-			count += 1;
-		}
-		if(count <= 20) {
-			i_10 = i;
-			break;
-		}
-	}*/
-
-	int a0 = jedi[i_10][1];
+	vector<vector<int>> segments;
 	for(unsigned i = 0; i < n; i++) {
-		cout << a0 << " " << jedi[i][1] << " " << jedi[i][2] << endl;
-		jedi[i][1] = (m + jedi[i][1] - a0) % m;
-		jedi[i][2] = (m + jedi[i][2] - a0) % m;
-		cout << a0 << " " << jedi[i][1] << " " << jedi[i][2] << endl;
+		int a = jedi[i][1], b = jedi[i][2];
+		if(a <= b) {
+			segments.push_back(jedi[i]);
+		} else {
+			vector<int> start(3), end(3);
+			start[0] = end[0] = i;
+			start[1] = a;
+			start[2] = m-1;
+			end[1] = 0;
+			end[2] = b;
+			segments.push_back(start);
+			segments.push_back(end);
+		}
 	}
-	auto it_start = jedi_a.lower_bound(jedi[i_10][1]);
-	auto it_end = jedi_a.upper_bound(jedi[i_10][2]);
-	vector<int> overlapping;
-	for(auto it = it_start; it != it_end; it++) {
-		overlapping.push_back(it->second);
+	// Sort by a.
+	sort(segments.begin(), segments.end(), [](vector<int> j1, vector<int> j2) {
+		return j1[1] < j2[1];
+	});
+
+	// Now find segment i with at most 10 overlap (for now 0)
+	int o = 0;
+	int b = 0;
+	for(auto it = segments.begin(); it != segments.end(); ++it) {
+		// If next a is after current b
+		if(b < (*it)[1]) {
+			o = (*it)[1]-1;
+			break;
+		} else {
+			b = max(b, (*it)[2]);
+		}
 	}
 
-	sort(jedi.begin(), jedi.end(), [](vector<int> j1, vector<int> j2) {
+//	cout << o << endl;
+
+	// Re-center (no split for now)
+	for(unsigned i = 0; i < n; i++) {
+		int a = jedi[i][1], b = jedi[i][2];
+		if(a > o) {
+			jedi[i][1] = a-o;
+		} else {
+			jedi[i][1] = a-o+m;
+		}
+		if(b > o) {
+			jedi[i][2] = b-o;
+		} else {
+			jedi[i][2] = b-o+m;
+		}
+/*		cout << jedi[i][0] << endl;
+		cout << jedi[i][1] << endl;
+		cout << jedi[i][2] << endl;*/
+	}
+
+	vector<vector<int>> no_overlap = jedi;
+	// sort by b ("deadline")
+	sort(no_overlap.begin(), no_overlap.end(), [](vector<int> j1, vector<int> j2) {
 		return j1[2] < j2[2];
 	});
 
-	int c = schedule(jedi, overlapping, 0, m);
-	for(auto it = overlapping.begin(); it != overlapping.end(); it++) {
-		vector<int> j = jedi[*it];
-		c = max(schedule(jedi, overlapping, j[1], j[2])+1,c);
-	}
-
-	cout << c << endl;
+	cout << EDF(no_overlap, 0, m+1) << endl;
 }
 
 int main() {
