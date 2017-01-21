@@ -6,13 +6,13 @@
 
 using namespace std;
 
-int EDF(vector<vector<int>>& jedis, int a_min, int b_max) {
+inline int EDF(vector<pair<int, int>>& jedis, int a_min, int b_max) {
 	int a = a_min;
 	int n = 0;
 	for(auto it = jedis.begin(); it != jedis.end(); ++it) {
-		if((*it)[1] > a && (*it)[2] < b_max) {
+		if(it->first > a && it->second < b_max) {
 			// Schedule
-			a = (*it)[2];
+			a = it->second;
 			n += 1;
 		}
 	}
@@ -20,81 +20,82 @@ int EDF(vector<vector<int>>& jedis, int a_min, int b_max) {
 }
 
 void testcase() {
-	unsigned n, m;
+	int n, m;
 	cin >> n >> m;
 
-	vector<vector<int>> jedi(n);
+	vector<pair<int, int>> jedi(n);
 
-	for(unsigned i = 0; i < n; i++) {
+	map<int, int> counter;
+
+	for(int i = 0; i < n; i++) {
 		int a, b;
 		cin >> a >> b;
-		jedi[i].push_back(i);
+		a -= 1;
+		b -= 1;
 		// 0-based indexing
-		jedi[i].push_back(a-1);
-		jedi[i].push_back(b-1);
-	}
+		jedi[i].first = a;
+		jedi[i].second = b;
 
-	vector<vector<int>> segments;
-	for(unsigned i = 0; i < n; i++) {
-		int a = jedi[i][1], b = jedi[i][2];
-		if(a <= b) {
-			segments.push_back(jedi[i]);
-		} else {
-			vector<int> start(3), end(3);
-			start[0] = end[0] = i;
-			start[1] = a;
-			start[2] = m-1;
-			end[1] = 0;
-			end[2] = b;
-			segments.push_back(start);
-			segments.push_back(end);
+		counter[a]++;
+		counter[b]--;
+		if(a > b) {
+			counter[0]++;
 		}
 	}
-	// Sort by a.
-	sort(segments.begin(), segments.end(), [](vector<int> j1, vector<int> j2) {
-		return j1[1] < j2[1];
-	});
 
 	// Now find segment i with at most 10 overlap (for now 0)
 	int o = 0;
-	int b = 0;
-	for(auto it = segments.begin(); it != segments.end(); ++it) {
-		// If next a is after current b
-		if(b < (*it)[1]) {
-			o = (*it)[1]-1;
-			break;
-		} else {
-			b = max(b, (*it)[2]);
+	int min_k = n;
+	int k = 0;
+	for(auto it = counter.begin(); it != counter.end(); ++it) {
+		k += it->second;
+		if(k <= 10 && k < min_k) {
+			o = it->first;
+			min_k = k;
 		}
 	}
 
-//	cout << o << endl;
+//	cout << o << " " << min_k << endl;
 
-	// Re-center (no split for now)
-	for(unsigned i = 0; i < n; i++) {
-		int a = jedi[i][1], b = jedi[i][2];
+	// Re-center and split
+	vector<pair<int, int>> overlap;
+	vector<pair<int, int>> no_overlap;
+	for(int i = 0; i < n; i++) {
+		int a = jedi[i].first, b = jedi[i].second;
+		// recenter
 		if(a > o) {
-			jedi[i][1] = a-o;
+			jedi[i].first = a-o;
 		} else {
-			jedi[i][1] = a-o+m;
+			jedi[i].first = a-o+m;
 		}
 		if(b > o) {
-			jedi[i][2] = b-o;
+			jedi[i].second = b-o;
 		} else {
-			jedi[i][2] = b-o+m;
+			jedi[i].second = b-o+m;
 		}
-/*		cout << jedi[i][0] << endl;
-		cout << jedi[i][1] << endl;
-		cout << jedi[i][2] << endl;*/
+		// These here are still old a's and b's:
+		if((a <= b && a <= o && o <= b) ||
+				(a > b && (a <= o || o <= b))) {
+			// overlaps
+			overlap.push_back(jedi[i]);
+		} else {
+			no_overlap.push_back(jedi[i]);
+		}
 	}
 
-	vector<vector<int>> no_overlap = jedi;
+//	cout << overlap.size() << "+" << no_overlap.size() << endl;
+
 	// sort by b ("deadline")
-	sort(no_overlap.begin(), no_overlap.end(), [](vector<int> j1, vector<int> j2) {
-		return j1[2] < j2[2];
+	sort(no_overlap.begin(), no_overlap.end(), [](pair<int, int> j1, pair<int, int> j2) {
+		return j1.second < j2.second;
 	});
 
-	cout << EDF(no_overlap, 0, m+1) << endl;
+	int n_max = EDF(no_overlap, -1, m);
+	for(auto it = overlap.begin(); it != overlap.end(); it++) {
+//		cout << it->first << it->second << endl;
+		n_max = max(n_max, EDF(no_overlap, it->second % m, it->first)+1);
+	}
+	cout << n_max << endl;
 }
 
 int main() {
