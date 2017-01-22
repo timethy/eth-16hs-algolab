@@ -174,6 +174,7 @@ The test files (including reference outputs) are provided as part of the course.
   * PotW: The Empire Strikes Back 100/100 -- LP, Delaunay
 13. week (1.5/4)
   * DHL 60/100
+  * Sweepers 100/100 -- Euler-tours; maxflow (bordercases with connected-components)
   * PotW: The Phantom Menace 100/100 -- maxflow
 14. week: Christmas Challenge (Cantonal Courier) 100/100 -- maxflow (still not 100% sure why it works)
 

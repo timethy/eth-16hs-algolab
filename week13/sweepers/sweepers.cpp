@@ -85,23 +85,23 @@ void testcase() {
 		degree[u]++;
 		degree[v]++;
 	}
-	if(m == 0) {
-		cout << "yes" << endl;
-		return;
-	}
-	vector<int> components(n+2);
+	vector<int> components(n + 2);
 	int ncc = connected_components(G, &components[0]);
 	for (int i = 0; i < ncc; i++) {
 		// if component has a sweeper or is the sink or source (j >= n)
 		bool has_sweeper = false;
-		// there exist one sweeper per connected component
-		for (unsigned j = 0; j < n+2; ++j) {
-//			cout << "j=" << j << "i=" << i << endl;
-			if(components[j] == i && (j >= n || sweepers[j] > 0)) {
-				has_sweeper = true;
+		int num = 0;
+		// if there are more than two nodes in this component (i. e. at least one edge)
+		// there must exist at least one sweeper per connected component
+		for (unsigned j = 0; j < n; ++j) {
+			if(components[j] == i) {
+				num += 1;
+				if (sweepers[j] > 0) {
+					has_sweeper = true;
+				}
 			}
 		}
-		if(!has_sweeper) {
+		if (num >= 2 && !has_sweeper) {
 			cout << "no" << endl;
 			return;
 		}
