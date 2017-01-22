@@ -7,165 +7,76 @@
 
 using namespace std;
 
-// MESSY, incompleted ideas:
-
-/*
-int combinations(int a, vector<unsigned> &ls, bitset<20> used, int edge) {
-	if(edge == 4) {
+inline int num_a(vector<unsigned> c, vector<unsigned> &s, unsigned i, unsigned a) {
+	if (c.size() == i) {
 		return 1;
-	} else {
-		// all subsets:
-		int l_count = ls.size();
-		int feasible = 0;
-		for (int i = 0; i < (1 << l_count); i++) {
-			bitset<20> new_edges(i);
-			if ((used & new_edges).none()) {
-				// return 0 if infeasible, 1 if feasible
-				int b = 0;
-				for (unsigned i = 0; i < ls.size(); i++) {
-					if (new_edges[i]) {
-						b += ls[i];
-					}
-				}
-				if (a == b) {
-//					cout << edge << " " << used << " " << new_edges << endl;
-					feasible += combinations(a, ls, used | new_edges, edge + 1);
-				}
-			}
-		}
-		return feasible;
 	}
+	unsigned n = 0;
+	for (unsigned c_e = 1; c_e*s[i] <= a && c_e < c[i]; ++c_e) {
+		auto c_ = c;
+		c_[i] -= c_e;
+		n += num_a(c, s, i + 1, a - c_e*s[i]);
+	}
+	n += num_a(c, s, i + 1, a);
+	if (c[i]*s[i] <= a) {
+		n += num_a(c, s, i + 1, a - c[i]*s[i]);
+	}
+	return n;
 }
 
-vector<bitset<20>> all_feasible_subsets(int a, vector<unsigned> &ls) {
-	vector<bitset<20>> feasible;
-	for (int i = 0; i < (1 << ls.size()); i++) {
-		bitset<20> edges(i);
-		int b = 0;
-		for (unsigned i = 0; i < ls.size(); i++) {
-			if (edges[i]) {
-				b += ls[i];
+inline int num_2a(vector<unsigned> c, vector<unsigned> &s, unsigned i,
+                  vector<unsigned> v, unsigned a, unsigned a_total) {
+	if (c.size() == i) {
+		if(a == 0) {
+			bool lex_bigger = true;
+			for (auto v_it = v.begin(), c_it = c.begin();
+			     v_it != v.end() && c_it != c.end();) {
+				if(*v_it > *c_it) {
+					break;
+				}
+				if(*v_it < *c_it) {
+					lex_bigger = false;
+					break;
+				}
+				++v_it;
+				++c_it;
 			}
-		}
-		if (a == b) {
-			feasible.push_back(edges);
-		}
-	}
-	return feasible;
-}
-*/
-/*
-bool feasible_vec(int a, vector<unsigned> &ls, vector<bitset<20>> &edges) {
-	bool feasible;
-	for (vector<bitset<20>>::iterator it = edges.begin(); it != edges.end(); ++it) {
-		bitset<20> edge = *it;
-		int b = 0;
-		for (unsigned i = 0; i < ls.size(); i++) {
-			if (edge[i]) {
-				b += ls[i];
+			if (lex_bigger) {
+				for (auto it = v.begin(); it != v.end(); ++it) {
+					cout << *it << " ";
+				}
+				cout << endl;
+				return num_a(c, s, 0, a_total/2)*num_a(v, s, 0, a_total/2);
 			}
+			for (auto it = c.begin(); it != c.end(); ++it) {
+				cout << *it << " ";
+			}
+			cout << "-";
+				for (auto it = v.begin(); it != v.end(); ++it) {
+					cout << *it << " ";
+				}
+			cout << "n" << endl;
+			return 0;
 		}
-		feasible &= (a == b);
-	}
-	return feasible;
-}
-*/
-bool feasible(int a, vector<unsigned> &ls, bitset<20> edge) {
-	int b = 0;
-	for (unsigned i = 0; i < ls.size(); i++) {
-		if (edge[i]) {
-			b += ls[i];
-		}
-	}
-	return a == b;
-}
-bool feasible_2(int a, vector<unsigned> &ls, bitset<20> edge) {
-	int b = 0, b_ = 0;
-	for (unsigned i = 0; i < ls.size(); i++) {
-		if (edge[i]) {
-			b += ls[i];
-		} else {
-			b_ += ls[i];
-		}
-	}
-	return a == b && a == b_;
-}
-int count(int a, vector<unsigned> &ls, vector<int>& assign, int idx) {
-	if(idx > ls.size()) {
 		return 0;
 	}
-	if(idx == ls.size()) {
-		bool f = true;
-		bitset<20> chosen;
-		for (int j = 0; j < 3; j++) {
-			bitset<20> edge;
-			for (int i = 0; i < ls.size(); i++) {
-				if(assign[i] == j) {
-					edge.set(i);
-				}
-			}
-			f &= feasible(a, ls, edge);
-			chosen &= edge;
-		}
-		cout << chosen << endl;
-		f &= feasible(a, ls, chosen.flip());
-		return f ? 1 : 0;
+	unsigned n = 0;
+	for (unsigned c_e = 1; c_e*s[i] <= a && c_e < c[i]; ++c_e) {
+		auto c_ = c;
+		c_[i] -= c_e;
+		v[i] = c_e;
+		n += num_2a(c_, s, i + 1, v, a - c_e*s[i], a_total);
 	}
-	int c = 0;
-	vector<int> assign_ = assign;
-	for (int j = 0; j < 3; j++) {
-		assign_[idx] = j;
-		c += count(a, ls, assign, idx+2);
-		c += count(a, ls, assign_, idx+1);
+	v[i] = 0;
+	n += num_2a(c, s, i + 1, v, a, a_total);
+	if (c[i]*s[i] <= a) {
+		auto c_ = c;
+		c_[i] = 0;
+		v[i] = c[i];
+		n += num_2a(c_, s, i + 1, v, a - c[i]*s[i], a_total);
 	}
-	return c;
+	return n;
 }
-
-int count(int a, vector<unsigned> &ls) {
-
-}
-
-/*int count(int a, vector<unsigned> &ls) {
-	int c = 0;
-	vector<bitset<20>> edge;
-	bitset<20> FLIP((1<<ls.size()) - 1);
-	for (int i = 0; i < (1 << ls.size()); i++) {
-		bitset<20> two_edges(i);
-		int t = two_edges.count();
-		if(t <= ls.size/2 && feasible(2*a, ls, two_edges)) {
-			// Now take subedge:
-			for (int j = 0; j < (1 << t); j++) {
-				bitset<20> filter(j);
-				bitset<20> edge1, edge2, edge3, edge4;
-				int x = 0;
-				for (int k = 0; k < ls.size(); k++) {
-					if (two_edges.test(k)) {
-
-						x++;
-					} else {
-
-					}
-				}
-				bitset<20> edge1 = two_edges & filter,
-						edge2 = (FLIP xor two_edges) & filter,
-						edge3 = two_edges xor edge1,
-						edge4 = (FLIP xor two_edges) xor edge2;
-/**				cout << edge1 << " " << edge3 << " " << edge2 << " " << edge4 << endl;
-				cout << feasible(a, ls, edge1) << " "
-				     << feasible(a, ls, edge2) << " "
-				     << feasible(a, ls, edge3) << " "
-				     << feasible(a, ls, edge4) << " " << endl;
-				if (feasible(a, ls, edge1) &&
-				    feasible(a, ls, edge2) &&
-				    feasible(a, ls, edge3) &&
-				    feasible(a, ls, edge4)) {
-					c += 1;
-				}
-			}
-		}
-	}
-	return c;
-}*/
 
 void testcase() {
 	unsigned n;
@@ -177,21 +88,40 @@ void testcase() {
 		cin >> ls[i];
 		l_total += ls[i];
 	}
+	unsigned a = l_total/4;
 
-	// square_size must be l_total/4
-	int a = l_total / 4;
-//	int c = combinations(a, ls, bitset<20>(0), 0);
-/*	vector<bitset<20>> sets = all_feasible_subsets(a, ls);
-	map<unsigned long, bool> feasible;
-	for (vector<bitset<20>>::iterator it = sets.begin(); it != sets.end(); it++) {
-		feasible.insert(make_pair(it->to_ulong(), true));
-		cout << *it << endl;
-	}*/
+	// Idea: count how often which size exists s[i] (size), c[i] (number)
+	// Edge must be sum_i s[i]*c_e[i] = a, c_e[i] <= c[i];
+	sort(ls.begin(), ls.end());
+	reverse(ls.begin(), ls.end());
+	vector<unsigned> c(1), s(1);
+	int lengths = 1;
+	c[0] = 1;
+	s[0] = ls[0];
+	for (unsigned i = 0; i < n; i++) {
+		if (s[lengths - 1] == ls[i]) {
+			c[lengths - 1]++;
+		} else {
+			s.push_back(ls[i]);
+			c.push_back(1);
+			lengths += 1;
+		}
+	}
+	cout << "a=" << a << endl;
 
-	// Now take 4 sets and check if there are disjoint:
-	vector<int> empty(n);
-	int c = count(a, ls, empty, 0);
-	cout << c << endl;
+	for (auto it = s.begin(); it != s.end(); ++it) {
+		cout << *it << " ";
+	}
+	cout << endl;
+	for (auto it = c.begin(); it != c.end(); ++it) {
+		cout << *it << " ";
+	}
+	cout << endl;
+
+	vector<unsigned> v(lengths);
+
+	// Split into 2a
+	cout << num_2a(c, s, 0, v, 2*a, 2*a) << endl;
 }
 
 int main() {
