@@ -3,57 +3,63 @@
 #include <vector>
 #include <map>
 #include <algorithm>
+#include <climits>
 
 using namespace std;
 
 // WA for testset 4!
 void testcase() {
-	long long n, k;
+	int n, k;
 	cin >> n >> k;
 
-	vector<long long> v(n);
-	vector<long long> vs(n);
+	// IDEA: Build vs[k] = sum_i=1^k v[i];
+	// IDEA: Loop through 1..n and search (binary) for vs[k]+k in vs[k..n]
+
+	vector<int> v(n);
+	vector<int> vs(n);
 	for (int i = 0; i < n; i++) {
-		long long v_i;
+		int v_i;
 		cin >> v_i;
 		v[i] = v_i;
-		vs[i] = v_i + ((i == 0) ? 0L : vs[i - 1]);
+		vs[i] = v_i + ((i == 0) ? 0 : vs[i - 1]);
 	}
 
-	vector<long long> diff(n);
-	vector<int> j(n);
-	long long min_diff = INT64_MAX;
+	int a, b;
+	int min_diff = INT_MAX;
 	for (int i = 0; i < n; i++) {
-		auto bias = vs[i] - v[i];
-		auto l = lower_bound(vs.begin() + i, vs.end(), k + bias);
-		auto u = upper_bound(vs.begin() + i, vs.end(), k + bias);
-//		cout << i << " " << (l - vs.begin()) << " " << (u - vs.begin()) << " " << vs[i] << " " << k << endl;
-		if (l == vs.end()) {
-			// If all values in vs are smaller than k+bias
-			j[i] = n - 1;
-		} else {
-			if (u == vs.end()) {
-				j[i] = l - vs.begin();
-			} else { // both l and u exist
-				if (abs(k + bias - *l) <= abs((k + bias) - *u)) {
-					j[i] = l - vs.begin();
-				} else {
-					j[i] = u - vs.begin();
-				}
-			}
+		auto lb = lower_bound(vs.begin() + i, vs.end(), k + vs[i] - v[i]);
+		auto ub = upper_bound(vs.begin() + i, vs.end(), k + vs[i] - v[i]);
+		int lower = INT_MAX;
+		int equal = INT_MAX;
+		int upper = INT_MAX;
+		if (lb != vs.begin() + i) {
+			lower = *(lb-1) - vs[i] + v[i];
 		}
-		diff[i] = abs(k + bias - vs[j[i]]);
-		min_diff = min(min_diff, diff[i]);
-	}
-	int i_, j_;
-	for (int i = 0; i < n; i++) {
-		if (min_diff == diff[i]) {
-			i_ = i;
-			j_ = j[i];
-			break;
+		if (lb != vs.end()) {
+			equal = *lb - vs[i] + v[i];
+		}
+		if (ub != vs.end()) {
+			upper = *ub - vs[i] + v[i];
+		}
+//		cout << lower << " " << upper << endl;
+		if(abs(lower-k) < min_diff) {
+			a = i;
+			b = (lb-vs.begin())-1;
+			min_diff = abs(lower-k);
+		}
+		if(abs(equal-k) < min_diff) {
+			a = i;
+			b = lb-vs.begin();
+			min_diff = abs(equal-k);
+		}
+		if(abs(upper-k) < min_diff) {
+			a = i;
+			b = ub-vs.begin();
+			min_diff = abs(upper-k);
 		}
 	}
-	cout << i_ << " " << j_ << endl;
+
+	cout << a << " " << b << endl;
 }
 
 int main() {
