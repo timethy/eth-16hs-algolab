@@ -152,8 +152,8 @@ The test files (including reference outputs) are provided as part of the course.
   * PotW: Octopussy 100/100 -- EDF* (*= with dependencies)
 3. week (1/5)
   * PotW: *Attack of the clones* 100/100 -- EDF scheduling; index-tricks
-4. week (0.5/5)
-  * PotW: *TheeV* 0/100 -- Binary search, Minball?
+4. week (1/5)
+  * PotW: *TheeV* 100/100 -- Binary search, Min-Circle
 5. week (2/5)
   * PotW(A): On her Majesty's secret service 100/100 -- Dijkstra; exp-bin-search w/ max. cardinality matching
   * PotW(B): Poker Chips 100/100 -- Huge DP
