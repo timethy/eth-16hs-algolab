@@ -147,7 +147,7 @@ The test files (including reference outputs) are provided as part of the course.
   * Even Matrices 100/100
   * Even Pairs 100/100
   * False coin 100/100
-  * PotW: *Deck of cards* 80/100
+  * PotW: *Deck of cards* 100/100
 2. week (1/5)
   * PotW: Octopussy 100/100 -- EDF* (*= with dependencies)
 3. week (1/5)
