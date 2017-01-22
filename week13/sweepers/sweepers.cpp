@@ -5,6 +5,7 @@
 #include <algorithm>
 // BGL includes
 #include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/connected_components.hpp>
 #include <boost/graph/edmonds_karp_max_flow.hpp>
 
 using namespace std;
@@ -84,26 +85,45 @@ void testcase() {
 		degree[u]++;
 		degree[v]++;
 	}
+	if(m == 0) {
+		cout << "yes" << endl;
+		return;
+	}
+	vector<int> components(n+2);
+	int ncc = connected_components(G, &components[0]);
+	for (int i = 0; i < ncc; i++) {
+		// if component has a sweeper or is the sink or source (j >= n)
+		bool has_sweeper = false;
+		// there exist one sweeper per connected component
+		for (unsigned j = 0; j < n+2; ++j) {
+//			cout << "j=" << j << "i=" << i << endl;
+			if(components[j] == i && (j >= n || sweepers[j] > 0)) {
+				has_sweeper = true;
+			}
+		}
+		if(!has_sweeper) {
+			cout << "no" << endl;
+			return;
+		}
+	}
+
 	// EULER, Check if euler tours are possible
-	bool euler = true;
 	for (unsigned i = 0; i < n; i++) {
-		euler &= degree[i] % 2 == 0;
+		if(degree[i] % 2 != 0) {
+			cout << "no" << endl;
+			return;
+		}
 		ea.addEdge(V_SOURCE, i, sweepers[i]);
 		ea.addEdge(i, V_SINK, doors[i]);
 	}
 
-	if(s == 0 && n == 0) {
-		cout << "yes" << endl;
-	} else if(s != 0 && euler) {
-		unsigned flow = edmonds_karp_max_flow(G, V_SOURCE, V_SINK);
-		if(flow == s) {
-			cout << "yes" << endl;
-		} else {
-			cout << "no" << endl;
-		}
-	} else {
+	unsigned flow = edmonds_karp_max_flow(G, V_SOURCE, V_SINK);
+	if(flow != s) {
 		cout << "no" << endl;
+		return;
 	}
+
+	cout << "yes" << endl;
 }
 
 int main() {
