@@ -50,7 +50,7 @@ void testcase() {
 		mc.insert(P[k]);
 	}
 
-	cout << min(squared_distance(P0, P[k + 1]), r_rest) << endl;
+	cout << ceil(min(squared_distance(P0, P[k + 1]), r_rest)) << endl;
 }
 
 int main() {
