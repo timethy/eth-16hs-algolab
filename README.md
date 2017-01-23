@@ -164,13 +164,15 @@ The test files (including reference outputs) are provided as part of the course.
   * Even Pairs 100/100
   * False coin 100/100
   * PotW: *Deck of cards* 100/100
-2. week (1/5)
+2. week (2/5)
+  * Evolution: 100/100 -- "Skip-tree"
   * PotW: Octopussy 100/100 -- EDF* (*= with dependencies)
 3. week (1/5)
   * PotW: *Attack of the clones* 100/100 -- EDF scheduling; index-tricks
 4. week (1/5)
   * PotW: *TheeV* 100/100 -- Binary search, Min-Circle
-5. week (2/5)
+5. week (3/6)
+  * Lights at the Museum 100/100 -- Bruteforce/Split-and-List
   * PotW(A): On her Majesty's secret service 100/100 -- Dijkstra; exp-bin-search w/ max. cardinality matching
   * PotW(B): Poker Chips 100/100 -- Huge DP
 6. week (1/4)
@@ -179,11 +181,11 @@ The test files (including reference outputs) are provided as part of the course.
   * PotW: Knights 100/100 -- Max flow
 8. week (1/5)
   * PotW: Stamps 100/100 -- LP
-9. week
+9. week (1/5)
   * PotW: Casino Royale 80/80 -- Mincost Max-flow; tricky bias
-10. week
+10. week (1/4)
   * PotW: Sith 100/100 -- Binary search; Delaunay (->sparse graph), max-connected-component
-11. week
+11. week (1/4)
   * Carsharing 100/100 -- Like Casino Royale (mincost-maxflow)
   * PotW: Planks 60/100 -- ??
 12. week (4/6)
@@ -191,8 +193,8 @@ The test files (including reference outputs) are provided as part of the course.
   * Radiation 100/100 -- LP with tricks
   * New tiles 100/100 -- DP over lines (employing inner line monotonicity)
   * PotW: The Empire Strikes Back 100/100 -- LP, Delaunay
-13. week (1.5/4)
-  * DHL 60/100
+13. week (2.5/4)
+  * DHL 60/100 -- DP, Greedy (TODO)
   * Sweepers 100/100 -- Euler-tours; maxflow (bordercases with connected-components)
   * PotW: The Phantom Menace 100/100 -- maxflow
 14. week: Christmas Challenge (Cantonal Courier) 100/100 -- maxflow (still not 100% sure why it works)
