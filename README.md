@@ -186,7 +186,10 @@ The test files (including reference outputs) are provided as part of the course.
 11. week
   * Carsharing 100/100 -- Like Casino Royale (mincost-maxflow)
   * PotW: Planks 60/100 -- ??
-12. week (1/6)
+12. week (4/6)
+  * Placing Knights 100/100 -- Max bipartite matching
+  * Radiation 100/100 -- LP with tricks
+  * New tiles 100/100 -- DP over lines (employing inner line monotonicity)
   * PotW: The Empire Strikes Back 100/100 -- LP, Delaunay
 13. week (1.5/4)
   * DHL 60/100
