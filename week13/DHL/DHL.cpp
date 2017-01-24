@@ -12,30 +12,24 @@ void testcase() {
 	unsigned n;
 	cin >> n;
 
-	vector<int> a(n), b(n);
 	vector<int> Sa(n), Sb(n);
 
-	for (unsigned i = 0; i < n; i++) {
-		cin >> a[i];
-		if (i == 0) {
-			Sa[i] = a[i];
-		} else {
-			Sa[i] = Sa[i - 1] + a[i];
-		}
+	int a;
+	cin >> a;
+	Sa[0] = a;
+	for (unsigned i = 1; i < n; i++) {
+		cin >> a;
+		Sa[i] = Sa[i - 1] + a;
 	}
-	for (unsigned i = 0; i < n; i++) {
-		cin >> b[i];
-		if (i == 0) {
-			Sb[i] = b[i];
-		} else {
-			Sb[i] = Sb[i - 1] + b[i];
-		}
+	int b;
+	cin >> b;
+	Sb[0] = b;
+	for (unsigned i = 1; i < n; i++) {
+		cin >> b;
+		Sb[i] = Sb[i - 1] + b;
 	}
 
-	vector <vector<int>> DP(n + 1);
-	for (unsigned i = 0; i <= n; i++) {
-		DP[i] = vector<int>(n + 1);
-	}
+	vector <vector<int>> DP(n + 1, vector<int>(n+1));
 	for (unsigned i = 1; i <= n; i++) {
 		for (unsigned j = 1; j <= n; j++) {
 			int min_cost = INT_MAX;
