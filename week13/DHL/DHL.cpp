@@ -17,7 +17,7 @@ void testcase() {
 
 	for (unsigned i = 0; i < n; i++) {
 		cin >> a[i];
-		if(i == 0) {
+		if (i == 0) {
 			Sa[i] = a[i];
 		} else {
 			Sa[i] = Sa[i - 1] + a[i];
@@ -25,32 +25,46 @@ void testcase() {
 	}
 	for (unsigned i = 0; i < n; i++) {
 		cin >> b[i];
-		if(i == 0) {
+		if (i == 0) {
 			Sb[i] = b[i];
 		} else {
 			Sb[i] = Sb[i - 1] + b[i];
 		}
 	}
 
-	vector <vector<int>> DP(n+1);
+	vector <vector<int>> DP(n + 1);
 	for (unsigned i = 0; i <= n; i++) {
-		DP[i] = vector<int>(n+1);
+		DP[i] = vector<int>(n + 1);
 	}
 	for (unsigned i = 1; i <= n; i++) {
 		for (unsigned j = 1; j <= n; j++) {
 			int min_cost = INT_MAX;
-			if (i == 0 && j == 0) {
-				min_cost = 0;
+			{
+				unsigned j_ = j - 1;
+				int Sb_ = Sb[j - 1];
+				if (j_ > 0) { Sb_ -= Sb[j_ - 1]; }
+				int fb = Sb_ - (j - j_);
+				for (unsigned i_ = 0; i_ < i; i_++) {
+					// Make sure, not one stack is empty at the end (without the other being empty)
+					if ((i_ == 0 && j_ == 0) || (i_ != 0 && j_ != 0)) {
+						int Sa_ = Sa[i - 1];
+						if (i_ > 0) { Sa_ -= Sa[i_ - 1]; }
+						int cost = DP[i_][j_] + (Sa_ - (i - i_))*fb;
+						min_cost = min(min_cost, cost);
+					}
+				}
 			}
-			for (unsigned i_ = 0; i_ < i; i_++) {
+			{
+				unsigned i_ = i - 1;
+				int Sa_ = Sa[i - 1];
+				if (i_ > 0) { Sa_ -= Sa[i_ - 1]; }
+				int fa = Sa_ - (i - i_);
 				for (unsigned j_ = 0; j_ < j; j_++) {
 					// Make sure, not one stack is empty at the end (without the other being empty)
 					if ((i_ == 0 && j_ == 0) || (i_ != 0 && j_ != 0)) {
-						int Sa_ = Sa[i-1];
-						int Sb_ = Sb[j-1];
-						if(i_ > 0) { Sa_ -= Sa[i_-1]; }
-						if(j_ > 0) { Sb_ -= Sb[j_-1]; }
-						int cost = DP[i_][j_] + (Sa_ - (i - i_)) * (Sb_ - (j - j_));
+						int Sb_ = Sb[j - 1];
+						if (j_ > 0) { Sb_ -= Sb[j_ - 1]; }
+						int cost = DP[i_][j_] + fa*(Sb_ - (j - j_));
 						min_cost = min(min_cost, cost);
 					}
 				}
