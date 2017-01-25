@@ -25,16 +25,22 @@ typedef K::Point_2 P;
 inline pair<vector<bool>, int> safe_missions(int n, vector <P> &s, vector <P> &t,
                                   vector<P>& sp, vector<P>& ep,
                                   vector<unsigned>& jsp, vector<unsigned>& jep,
-                                  map<P, unsigned> &jammers,
-                                  Triangulation &del, double omega,
+                                  vector<P>& j,
+                                  vector<pair<int, int>> &edges, double omega,
                                              bool only_count) {
 	Graph G(n);
-	for (Edge_iterator e = del.finite_edges_begin(); e != del.finite_edges_end(); ++e) {
-		auto source = del.segment(e).source();
-		auto target = del.segment(e).target();
-		if (CGAL::squared_distance(source, target) <= omega) {
-			add_edge(jammers.at(source), jammers.at(target), G);
+	int a = 0, b = edges.size();
+	while(a != b) {
+		auto k = (a+b)/2;
+		auto p = edges[k];
+		if(CGAL::squared_distance(j[p.first], j[p.second]) <= omega) {
+			a = k+1;
+		} else {
+			b = k;
 		}
+	}
+	for(int i = 0; i < a; i++) {
+		add_edge(edges[i].first, edges[i].second, G);
 	}
 
 	vector<int> comps(n);
@@ -90,9 +96,20 @@ void testcase() {
 		jep[i] = pos_jammer.at(ep[i]);
 	}
 
+	vector<pair<int,int>> edges_by_distance;
+	for (Edge_iterator e = del.finite_edges_begin(); e != del.finite_edges_end(); ++e) {
+		auto source = del.segment(e).source();
+		auto target = del.segment(e).target();
+		edges_by_distance.push_back(make_pair(pos_jammer.at(source), pos_jammer.at(target)));
+	}
+	sort(edges_by_distance.begin(), edges_by_distance.end(), [&](pair<int, int> p1, pair<int, int> p2) {
+		return CGAL::squared_distance(j[p1.first], j[p1.second]) <
+				CGAL::squared_distance(j[p2.first], j[p2.second]);
+	});
+
 	vector<bool> safe;
 	int num;
-	tie(safe, num) = safe_missions(n, s, t, sp, ep, jsp, jep, pos_jammer, del, p, false);
+	tie(safe, num) = safe_missions(n, s, t, sp, ep, jsp, jep, j, edges_by_distance, p, false);
 	for (unsigned i = 0; i < m; i++) {
 		if (safe[i]) {
 			cout << "y";
@@ -104,60 +121,63 @@ void testcase() {
 
 	double min_p = 0;
 	double min_all_p = 0;
-	for (unsigned i = 0; i < m; i++) {
+	/*for (unsigned i = 0; i < m; i++) {
 		auto min_start = 4*CGAL::squared_distance(s[i], sp[i]);
 		auto min_end = 4*CGAL::squared_distance(t[i], ep[i]);
 		min_all_p = max(min_all_p, max(min_start, min_end));
 		if(safe[i]) {
 			min_p = max(min_p, max(min_start, min_end));
 		}
-	}
-	int iters = 0;
+	}*/
+	int n_a, n_b;
 	double p_a, p_b;
 	{
 		// Now look for min power consumption for given missions
-		double a = min_p, b = p;
-		double k;
+		int a = 0, b = edges_by_distance.size();
 		while (a != b) {
-			k = floor((a + b)/2);
-			vector<bool> safe_new;
-			int num_new;
-			tie(safe_new, num_new) = safe_missions(n, s, t, sp, ep, jsp, jep, pos_jammer, del, k, true);
-			if (num != num_new) {
-				a = k + 1;
+			auto k = (a + b)/2;
+			auto edge = edges_by_distance[k];
+			auto k_p = CGAL::squared_distance(j[edge.first], j[edge.second]);
+			if(k_p <= p) {
+				vector<bool> safe_new;
+				int num_new;
+				tie(safe_new, num_new) = safe_missions(n, s, t, sp, ep, jsp, jep, j, edges_by_distance, k_p, true);
+				if (num != num_new) {
+					a = k + 1;
+				} else {
+					b = k;
+				}
 			} else {
 				b = k;
 			}
-			iters += 1;
 		}
-		p_b = a;
+		n_b = a;
+		p_b = CGAL::squared_distance(j[edges_by_distance[n_b].first], j[edges_by_distance[n_b].second]);
 	}
 	{
 		// Now look for a
-		double a = min_all_p, b = max(p, min_all_p);
+		double a = max(p_b, min_all_p), b = max(p, min_all_p);
 		double k;
 		vector<bool> all_safe(m, true);
 		vector<bool> safe_new;
 		int num_new;
-		tie(safe_new, num_new) = safe_missions(n, s, t, sp, ep, jsp, jep, pos_jammer, del, b, true);
+		tie(safe_new, num_new) = safe_missions(n, s, t, sp, ep, jsp, jep, j, edges_by_distance, b, true);
 		while (num_new != m) {
-			b = floor(b*1.618);
-			iters += 1;
-			tie(safe_new, num_new) = safe_missions(n, s, t, sp, ep, jsp, jep, pos_jammer, del, b, true);
+			a = b+1;
+			b = max(floor(b*2), b+1);
+			tie(safe_new, num_new) = safe_missions(n, s, t, sp, ep, jsp, jep, j, edges_by_distance, b, true);
 		}
 		while (a != b) {
 			k = floor((a + b)/2);
-			tie(safe_new, num_new) = safe_missions(n, s, t, sp, ep, jsp, jep, pos_jammer, del, k, true);
+			tie(safe_new, num_new) = safe_missions(n, s, t, sp, ep, jsp, jep, j, edges_by_distance, k, true);
 			if (m != num_new) {
 				a = k + 1;
 			} else {
 				b = k;
 			}
-			iters += 1;
 		}
 		p_a = a;
 	}
-//	cout << iters << endl;
 	cout << p_a << endl;
 	cout << p_b << endl;
 }

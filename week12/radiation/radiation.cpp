@@ -97,6 +97,7 @@ void testcase() {
 	int a = 0;
 	int b = 1;
 	while(b < d_max && too_small(b, x_h, y_h, z_h, x_t, y_t, z_t)) {
+		a = b+1;
 		b *= 2;
 	}
 	b = min(b, d_max)+1;
