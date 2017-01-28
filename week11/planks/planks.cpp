@@ -28,17 +28,19 @@ vector<vector<int>> partition(int a, vector<int>& l) {
 		auto S1 = bitset<B>(s1);
 		for(int s2 = 0; s2 < (1<<n) - 1; s2++) {
 			auto S2 = bitset<B>(s2);
-			for(int s3 = 0; s3 < (1<<n) - 1; s3++) {
-				auto S3 = bitset<B>(s3);
-				if((S3 & (S1 | S2)).none() && (S1 & S2).none()) {
-					auto S4 = ALL xor (S3 | S2 | S1);
-					vector<int> lengths(4);
-					lengths[0] = (length_of(S4, l));
-					lengths[1] = (length_of(S3, l));
-					lengths[2] = (length_of(S2, l));
-					lengths[3] = (length_of(S1, l));
-//					cout << S1 << "|" << S2 << "|" << S3 << "|" << S4 << endl;
-					partitions.push_back(lengths);
+			if((S2 & S1).none()) {
+				for (int s3 = 0; s3 < (1 << n) - 1; s3++) {
+					auto S3 = bitset<B>(s3);
+					if ((S3 & (S1 | S2)).none()) {
+						auto S4 = ALL xor(S3 | S2 | S1);
+						vector<int> lengths(4);
+						lengths[0] = (length_of(S4, l));
+						lengths[1] = (length_of(S3, l));
+						lengths[2] = (length_of(S2, l));
+						lengths[3] = (length_of(S1, l));
+//						sort(lengths.begin(), lengths.end());
+						partitions.push_back(lengths);
+					}
 				}
 			}
 		}
@@ -70,6 +72,7 @@ void testcase() {
 	copy(ls.begin(), ls.begin()+N1, L1.begin());
 	copy(ls.begin()+N1, ls.end(), L2.begin());
 
+	// lengths are always largest first
 	vector<vector<int>> V1 = partition(a, L1);
 	vector<vector<int>> V2 = partition(a, L2);
 
@@ -87,7 +90,6 @@ void testcase() {
 		num += (ub - lb);
 	}
 
-	// Split into 2a
 	cout << num/24 << endl;
 }
 
