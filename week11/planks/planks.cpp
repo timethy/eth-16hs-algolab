@@ -10,41 +10,35 @@ using namespace std;
 
 const int B = 20;
 
-vector<vector<int>> partition(int p, int a, bitset<B> taken, vector<int>& l) {
+inline int length_of(bitset<B> bits, vector<int>& l) {
+	int len = 0;
+	for(unsigned i = 0; i < l.size(); i++) {
+		if(bits.test(i)) {
+			len += l[i];
+		}
+	}
+	return len;
+}
+
+vector<vector<int>> partition(int a, vector<int>& l) {
 	int n = l.size();
 	vector<vector<int>> partitions;
-	if(p == 1) {
-		int len = 0;
-		// take all that are not taken
-		auto take = bitset<B>((1<<n)-1) xor taken;
-		for (int i = 0; i < n; i++) {
-			if (take.test(i)) {
-				len += l[i];
-			}
-		}
-		if(len <= a) {
-			vector<int> p1;
-			p1.push_back(len);
-			partitions.push_back(p1);
-		}
-	} else {
-		for (int s = 0; s < (1<<n)-1; s++) {
-			auto take = bitset<B>(s);
-			if ((take & taken).none()) {
-				int len = 0, len_remaining = 0;
-				for (int i = 0; i < n; i++) {
-					if (take.test(i)) {
-						len += l[i];
-					} else if(!taken.test(i)) {
-						len_remaining += l[i];
-					}
-				}
-				if (len <= a && len_remaining <= (p-1)*a) {
-					auto prs = partition(p - 1, a, take | taken, l);
-					for (auto &pr : prs) {
-						pr.push_back(len);
-						partitions.push_back(pr);
-					}
+	auto ALL = bitset<B>((1<<n) - 1);
+	for(int s1 = 0; s1 < (1<<n) - 1; s1++) {
+		auto S1 = bitset<B>(s1);
+		for(int s2 = 0; s2 < (1<<n) - 1; s2++) {
+			auto S2 = bitset<B>(s2);
+			for(int s3 = 0; s3 < (1<<n) - 1; s3++) {
+				auto S3 = bitset<B>(s3);
+				if((S3 & (S1 | S2)).none() && (S1 & S2).none()) {
+					auto S4 = ALL xor (S3 | S2 | S1);
+					vector<int> lengths(4);
+					lengths[0] = (length_of(S4, l));
+					lengths[1] = (length_of(S3, l));
+					lengths[2] = (length_of(S2, l));
+					lengths[3] = (length_of(S1, l));
+//					cout << S1 << "|" << S2 << "|" << S3 << "|" << S4 << endl;
+					partitions.push_back(lengths);
 				}
 			}
 		}
@@ -76,8 +70,8 @@ void testcase() {
 	copy(ls.begin(), ls.begin()+N1, L1.begin());
 	copy(ls.begin()+N1, ls.end(), L2.begin());
 
-	vector<vector<int>> V1 = partition(4, a, bitset<B>(0), L1);
-	vector<vector<int>> V2 = partition(4, a, bitset<B>(0), L2);
+	vector<vector<int>> V1 = partition(a, L1);
+	vector<vector<int>> V2 = partition(a, L2);
 
 	sort(V2.begin(), V2.end());
 
