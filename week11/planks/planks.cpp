@@ -1,4 +1,5 @@
 // for algolab, by taubnert@ethz.ch
+#include <cassert>
 #include <iostream>
 #include <vector>
 #include <map>
@@ -7,121 +8,93 @@
 
 using namespace std;
 
-inline int num_a(vector<unsigned> c, vector<unsigned> &s, unsigned i, unsigned a) {
-	if (c.size() == i) {
-		return 1;
-	}
-	unsigned n = 0;
-	for (unsigned c_e = 1; c_e*s[i] <= a && c_e < c[i]; ++c_e) {
-		auto c_ = c;
-		c_[i] -= c_e;
-		n += num_a(c, s, i + 1, a - c_e*s[i]);
-	}
-	n += num_a(c, s, i + 1, a);
-	if (c[i]*s[i] <= a) {
-		n += num_a(c, s, i + 1, a - c[i]*s[i]);
-	}
-	return n;
-}
+const int B = 20;
 
-inline int num_2a(vector<unsigned> c, vector<unsigned> &s, unsigned i,
-                  vector<unsigned> v, unsigned a, unsigned a_total) {
-	if (c.size() == i) {
-		if(a == 0) {
-			bool lex_bigger = true;
-			for (auto v_it = v.begin(), c_it = c.begin();
-			     v_it != v.end() && c_it != c.end();) {
-				if(*v_it > *c_it) {
-					break;
-				}
-				if(*v_it < *c_it) {
-					lex_bigger = false;
-					break;
-				}
-				++v_it;
-				++c_it;
+vector<vector<int>> partition(int p, int a, bitset<B> taken, vector<int>& l) {
+	int n = l.size();
+	vector<vector<int>> partitions;
+	if(p == 1) {
+		int len = 0;
+		// take all that are not taken
+		auto take = bitset<B>((1<<n)-1) xor taken;
+		for (int i = 0; i < n; i++) {
+			if (take.test(i)) {
+				len += l[i];
 			}
-			if (lex_bigger) {
-				for (auto it = v.begin(); it != v.end(); ++it) {
-					cout << *it << " ";
-				}
-				cout << endl;
-				return num_a(c, s, 0, a_total/2)*num_a(v, s, 0, a_total/2);
-			}
-			for (auto it = c.begin(); it != c.end(); ++it) {
-				cout << *it << " ";
-			}
-			cout << "-";
-				for (auto it = v.begin(); it != v.end(); ++it) {
-					cout << *it << " ";
-				}
-			cout << "n" << endl;
-			return 0;
 		}
-		return 0;
+		if(len <= a) {
+			vector<int> p1;
+			p1.push_back(len);
+			partitions.push_back(p1);
+		}
+	} else {
+		for (int s = 0; s < (1<<n)-1; s++) {
+			auto take = bitset<B>(s);
+			if ((take & taken).none()) {
+				int len = 0, len_remaining = 0;
+				for (int i = 0; i < n; i++) {
+					if (take.test(i)) {
+						len += l[i];
+					} else if(!taken.test(i)) {
+						len_remaining += l[i];
+					}
+				}
+				if (len <= a && len_remaining <= (p-1)*a) {
+					auto prs = partition(p - 1, a, take | taken, l);
+					for (auto &pr : prs) {
+						pr.push_back(len);
+						partitions.push_back(pr);
+					}
+				}
+			}
+		}
 	}
-	unsigned n = 0;
-	for (unsigned c_e = 1; c_e*s[i] <= a && c_e < c[i]; ++c_e) {
-		auto c_ = c;
-		c_[i] -= c_e;
-		v[i] = c_e;
-		n += num_2a(c_, s, i + 1, v, a - c_e*s[i], a_total);
-	}
-	v[i] = 0;
-	n += num_2a(c, s, i + 1, v, a, a_total);
-	if (c[i]*s[i] <= a) {
-		auto c_ = c;
-		c_[i] = 0;
-		v[i] = c[i];
-		n += num_2a(c_, s, i + 1, v, a - c[i]*s[i], a_total);
-	}
-	return n;
+	return partitions;
 }
 
 void testcase() {
-	unsigned n;
+	int n;
 	cin >> n;
 
-	unsigned l_total = 0;
-	vector<unsigned> ls(n);
-	for (unsigned i = 0; i < n; i++) {
+	int l_total = 0;
+	vector<int> ls(n);
+	for (int i = 0; i < n; i++) {
 		cin >> ls[i];
 		l_total += ls[i];
 	}
-	unsigned a = l_total/4;
+	int a = l_total/4;
 
-	// Idea: count how often which size exists s[i] (size), c[i] (number)
-	// Edge must be sum_i s[i]*c_e[i] = a, c_e[i] <= c[i];
-	sort(ls.begin(), ls.end());
-	reverse(ls.begin(), ls.end());
-	vector<unsigned> c(1), s(1);
-	int lengths = 1;
-	c[0] = 1;
-	s[0] = ls[0];
-	for (unsigned i = 0; i < n; i++) {
-		if (s[lengths - 1] == ls[i]) {
-			c[lengths - 1]++;
-		} else {
-			s.push_back(ls[i]);
-			c.push_back(1);
-			lengths += 1;
+	// First sort by size, bigger first
+	sort(ls.rbegin(), ls.rend());
+
+	int N1 = n/2;
+	int N2 = n - N1;
+
+	vector<int> L1(N1);
+	vector<int> L2(N2);
+
+	copy(ls.begin(), ls.begin()+N1, L1.begin());
+	copy(ls.begin()+N1, ls.end(), L2.begin());
+
+	vector<vector<int>> V1 = partition(4, a, bitset<B>(0), L1);
+	vector<vector<int>> V2 = partition(4, a, bitset<B>(0), L2);
+
+	sort(V2.begin(), V2.end());
+
+	long num = 0;
+	for(auto it = V1.begin(); it != V1.end(); it++) {
+		vector<int> p = *it;
+		vector<int> p_missing;
+		for(auto itp = p.rbegin(); itp != p.rend(); itp++) {
+			p_missing.push_back(a-*itp);
 		}
+		vector<vector<int>>::iterator lb, ub;
+		tie(lb, ub) = equal_range(V2.begin(), V2.end(), p_missing);
+		num += (ub - lb);
 	}
-	cout << "a=" << a << endl;
-
-	for (auto it = s.begin(); it != s.end(); ++it) {
-		cout << *it << " ";
-	}
-	cout << endl;
-	for (auto it = c.begin(); it != c.end(); ++it) {
-		cout << *it << " ";
-	}
-	cout << endl;
-
-	vector<unsigned> v(lengths);
 
 	// Split into 2a
-	cout << num_2a(c, s, 0, v, 2*a, 2*a) << endl;
+	cout << num/24 << endl;
 }
 
 int main() {
