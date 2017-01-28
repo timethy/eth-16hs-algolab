@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const int B = 20;
+const int B = 21;
 
 inline int length_of(bitset<B> bits, vector<int>& l) {
 	int len = 0;
@@ -24,25 +24,24 @@ vector<vector<int>> partition(int a, vector<int>& l) {
 	int n = l.size();
 	vector<vector<int>> partitions;
 	auto ALL = bitset<B>((1<<n) - 1);
-	for(int s1 = 0; s1 < (1<<n) - 1; s1++) {
+	for(int s1 = 0; s1 < (1<<n); s1++) {
 		auto S1 = bitset<B>(s1);
-		for(int s2 = 0; s2 < (1<<n) - 1; s2++) {
+		for(int s2 = 0; s2 < (1<<n); s2++) {
 			auto S2 = bitset<B>(s2);
-			if((S2 & S1).none()) {
-				for (int s3 = 0; s3 < (1 << n) - 1; s3++) {
-					auto S3 = bitset<B>(s3);
-					if ((S3 & (S1 | S2)).none()) {
-						auto S4 = ALL xor(S3 | S2 | S1);
-						vector<int> lengths(4);
-						lengths[0] = (length_of(S4, l));
-						lengths[1] = (length_of(S3, l));
-						lengths[2] = (length_of(S2, l));
-						lengths[3] = (length_of(S1, l));
-//						sort(lengths.begin(), lengths.end());
-						partitions.push_back(lengths);
-					}
+			auto F1 = S1 & S2; // In both sets
+			auto F2 = S2 & (ALL xor S1); // In S1 but not S2
+			auto F3 = S1 & (ALL xor S2); // In S2 but not S1
+			auto F4 = ALL xor (S1 | S2); // In neither sets
+			vector<int> ls(4);
+			ls[0] = length_of(F1, l);
+			ls[1] = length_of(F2, l);
+			ls[2] = length_of(F3, l);
+			ls[3] = length_of(F4, l);
+//			if(ls[0] >= ls[1] && ls[1] >= ls[2] && ls[2] >= ls[3]) {
+				if (*max_element(ls.begin(), ls.end()) <= a) {
+					partitions.push_back(ls);
 				}
-			}
+//			}
 		}
 	}
 	return partitions;
