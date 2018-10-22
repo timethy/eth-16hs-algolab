@@ -3,7 +3,7 @@ In this repository you find my solutions to the problems posed as part of the "A
 (See http://www.cadmo.ethz.ch/education/lectures/HS16/algolab/index.html)
 
 You can do whatever you want with my solutions except for claiming they are yours.
-The code is written by me, I did not come up with all algorithmic ideas..
+The code is written by me, I did not come up with algorithmic ideas..
 
 The test files (including reference outputs) are provided as part of the course. For some problems I added some extra test cases.
 
@@ -13,14 +13,15 @@ The test files (including reference outputs) are provided as part of the course.
 # Tricks/Pitfalls
 
 * Rounding errors in Min_circle
-** Use: Exact_predicates_exact_constructions_kernel.h
-** convert to double: ceil(to_double(et));
+  * Use: Exact_predicates_exact_constructions_kernel.h
+  * Use: Exact_predicates_exact_constructions_kernel.h
+  * convert to double: ceil(to_double(et))
 * Bias for non-negative weights max-flow-min-cost
 * LP: Different kernels for different precisions (see http://doc.cgal.org/latest/Number_types/group__nt__gmp.html)
-** Gmpz.h: Arbitrary precision integer
-** Gmpzf.h: Multiple-precision floating-point number (m*2^e), generally faster than MP_Float.h
-** Gmpq.h: Arbitrary precision rational
-** MP_Float.h: Arbitrary precision float
+  * Gmpz.h: Arbitrary precision integer
+  * Gmpzf.h: Multiple-precision floating-point number (m*2^e), generally faster than MP_Float.h
+  * Gmpq.h: Arbitrary precision rational
+  * MP_Float.h: Arbitrary precision float
 
 
 (... spoilers below)
@@ -187,7 +188,7 @@ The test files (including reference outputs) are provided as part of the course.
   * PotW: Sith 100/100 -- Binary search; Delaunay (->sparse graph), max-connected-component
 11. week (1/4)
   * Carsharing 100/100 -- Like Casino Royale (mincost-maxflow)
-  * PotW: Planks 60/100 -- ??
+  * PotW: Planks 60/100 -- (You can do Split-and-List)
 12. week (4/6)
   * Placing Knights 100/100 -- Max bipartite matching
   * Radiation 100/100 -- LP with tricks
